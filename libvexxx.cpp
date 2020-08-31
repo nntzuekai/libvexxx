@@ -59,9 +59,9 @@ IR_stmt_types::I_mark::from_c(const IRStmt *s) {
 	return st;
 }
 
-std::unique_ptr<IR_stmt_types::Put>
-IR_stmt_types::Put::from_c(const IRStmt *s) {
-	auto st = std::make_unique<Put>();
+std::unique_ptr<IR_stmt_types::put>
+IR_stmt_types::put::from_c(const IRStmt *s) {
+	auto st = std::make_unique<put>();
 
 	st->tag = Ist_Put;
 	st->offset = s->Ist.Put.offset;
@@ -70,28 +70,35 @@ IR_stmt_types::Put::from_c(const IRStmt *s) {
 	return st;
 }
 
-std::unique_ptr<IR_stmt_types::Put_I>
-IR_stmt_types::Put_I::from_c(const IRStmt *s) {
-	auto st = std::make_unique<Put_I>();
+std::unique_ptr<IR_stmt_types::put_I>
+IR_stmt_types::put_I::from_c(const IRStmt *s) {
+	auto st = std::make_unique<put_I>();
 
 	st->tag = Ist_PutI;
 
-	st->details = IR_put_I_xx::from_c(s->Ist.PutI.details);
+	auto &&det = s->Ist.PutI.details;
+
+	copy_IRRegArray(&(st->descr), det->descr);
+	st->ix = IR_expr_xx::from_c(det->ix);
+	st->bias = det->bias;
+	st->data = IR_expr_xx::from_c(det->data);
 
 	return st;
 }
 
+/*
 std::unique_ptr<IR_put_I_xx> IR_put_I_xx::from_c(const IRPutI *s) {
-	auto st = std::make_unique<IR_put_I_xx>();
+    auto st = std::make_unique<IR_put_I_xx>();
 
-	// st->descr = *(s->descr);
-	copy_IRRegArray(&(st->descr), s->descr);
-	st->ix = IR_expr_xx::from_c(s->ix);
-	st->bias = s->bias;
-	st->data = IR_expr_xx::from_c(s->data);
+    // st->descr = *(s->descr);
+    copy_IRRegArray(&(st->descr), s->descr);
+    st->ix = IR_expr_xx::from_c(s->ix);
+    st->bias = s->bias;
+    st->data = IR_expr_xx::from_c(s->data);
 
-	return st;
+    return st;
 }
+*/
 
 std::unique_ptr<IR_stmt_types::wr_tmp>
 IR_stmt_types::wr_tmp::from_c(const IRStmt *s) {
@@ -104,9 +111,9 @@ IR_stmt_types::wr_tmp::from_c(const IRStmt *s) {
 	return st;
 }
 
-std::unique_ptr<IR_stmt_types::Store>
-IR_stmt_types::Store::from_c(const IRStmt *s) {
-	auto st = std::make_unique<Store>();
+std::unique_ptr<IR_stmt_types::store>
+IR_stmt_types::store::from_c(const IRStmt *s) {
+	auto st = std::make_unique<store>();
 
 	st->tag = Ist_Store;
 	st->end = s->Ist.Store.end;
@@ -123,69 +130,100 @@ IR_stmt_types::store_G::from_c(const IRStmt *s) {
 	auto st = std::make_unique<store_G>();
 
 	st->tag = Ist_StoreG;
-	st->details = IR_store_G_xx::from_c(s->Ist.StoreG.details);
+
+	auto &&det = s->Ist.StoreG.details;
+	st->end = det->end;
+	st->addr = IR_expr_xx::from_c(det->addr);
+	st->data = IR_expr_xx::from_c(det->data);
+	st->guard = IR_expr_xx::from_c(det->guard);
 
 	return st;
 }
 
+/*
 std::unique_ptr<IR_store_G_xx> IR_store_G_xx::from_c(const IRStoreG *s) {
-	auto st = std::make_unique<IR_store_G_xx>();
-	st->end = s->end;
-	st->addr = IR_expr_xx::from_c(s->addr);
-	st->data = IR_expr_xx::from_c(s->data);
-	st->guard = IR_expr_xx::from_c(s->guard);
+    auto st = std::make_unique<IR_store_G_xx>();
+    st->end = s->end;
+    st->addr = IR_expr_xx::from_c(s->addr);
+    st->data = IR_expr_xx::from_c(s->data);
+    st->guard = IR_expr_xx::from_c(s->guard);
 
-	assert(st->end == Iend_LE || st->end == Iend_BE);
-	return st;
+    assert(st->end == Iend_LE || st->end == Iend_BE);
+    return st;
 }
+*/
 
-std::unique_ptr<IR_stmt_types::load_g>
-IR_stmt_types::load_g::from_c(const IRStmt *s) {
-	auto st = std::make_unique<load_g>();
+std::unique_ptr<IR_stmt_types::load_G>
+IR_stmt_types::load_G::from_c(const IRStmt *s) {
+	auto st = std::make_unique<load_G>();
 
 	st->tag = Ist_LoadG;
-	st->details = IR_load_G_xx::from_c(s->Ist.LoadG.details);
+
+	auto *det = s->Ist.LoadG.details;
+	st->end = det->end;
+	st->cvt = det->cvt;
+	st->dst = det->dst;
+	st->addr = IR_expr_xx::from_c(det->addr);
+	st->alt = IR_expr_xx::from_c(det->alt);
+	st->guard = IR_expr_xx::from_c(det->guard);
+
+	// st->details = IR_load_G_xx::from_c(s->Ist.LoadG.details);
 
 	return st;
 }
 
+/*
 std::unique_ptr<IR_load_G_xx> IR_load_G_xx::from_c(const IRLoadG *s) {
-	auto st = std::make_unique<IR_load_G_xx>();
+    auto st = std::make_unique<IR_load_G_xx>();
 
-	st->end = s->end;
-	st->cvt = s->cvt;
-	st->dst = s->dst;
-	st->addr = IR_expr_xx::from_c(s->addr);
-	st->alt = IR_expr_xx::from_c(s->alt);
-	st->guard = IR_expr_xx::from_c(s->guard);
+    st->end = s->end;
+    st->cvt = s->cvt;
+    st->dst = s->dst;
+    st->addr = IR_expr_xx::from_c(s->addr);
+    st->alt = IR_expr_xx::from_c(s->alt);
+    st->guard = IR_expr_xx::from_c(s->guard);
 
-	return st;
+    return st;
 }
+*/
 
 std::unique_ptr<IR_stmt_types::CAS>
 IR_stmt_types::CAS::from_c(const IRStmt *s) {
-	auto st = std::make_unique<CAS>();
+	auto rtv = std::make_unique<CAS>();
 
-	st->tag = Ist_CAS;
-	st->details = IR_CAS_xx::from_c(s->Ist.CAS.details);
+	rtv->tag = Ist_CAS;
 
-	return st;
-}
+	auto *det = s->Ist.CAS.details;
+	rtv->old_hi = det->oldHi;
+	rtv->old_lo = det->oldLo;
+	rtv->end = det->end;
+	rtv->addr = IR_expr_xx::from_c(det->addr);
+	rtv->expd_hi = IR_expr_xx::from_c(det->expdHi);
+	rtv->expd_lo = IR_expr_xx::from_c(det->expdLo);
+	rtv->data_hi = IR_expr_xx::from_c(det->dataHi);
+	rtv->data_lo = IR_expr_xx::from_c(det->dataLo);
 
-std::unique_ptr<IR_CAS_xx> IR_CAS_xx::from_c(const IRCAS *s) {
-	auto rtv = std::make_unique<IR_CAS_xx>();
-
-	rtv->old_hi = s->oldHi;
-	rtv->old_lo = s->oldLo;
-	rtv->end = s->end;
-	rtv->addr = IR_expr_xx::from_c(s->addr);
-	rtv->expd_hi = IR_expr_xx::from_c(s->expdHi);
-	rtv->expd_lo = IR_expr_xx::from_c(s->expdLo);
-	rtv->data_hi = IR_expr_xx::from_c(s->dataHi);
-	rtv->data_lo = IR_expr_xx::from_c(s->dataLo);
+	// st->details = IR_CAS_xx::from_c(s->Ist.CAS.details);
 
 	return rtv;
 }
+
+/*
+std::unique_ptr<IR_CAS_xx> IR_CAS_xx::from_c(const IRCAS *s) {
+    auto rtv = std::make_unique<IR_CAS_xx>();
+
+    rtv->old_hi = s->oldHi;
+    rtv->old_lo = s->oldLo;
+    rtv->end = s->end;
+    rtv->addr = IR_expr_xx::from_c(s->addr);
+    rtv->expd_hi = IR_expr_xx::from_c(s->expdHi);
+    rtv->expd_lo = IR_expr_xx::from_c(s->expdLo);
+    rtv->data_hi = IR_expr_xx::from_c(s->dataHi);
+    rtv->data_lo = IR_expr_xx::from_c(s->dataLo);
+
+    return rtv;
+}
+*/
 
 std::unique_ptr<IR_stmt_types::LLSC>
 IR_stmt_types::LLSC::from_c(const IRStmt *s) {
@@ -203,37 +241,31 @@ IR_stmt_types::LLSC::from_c(const IRStmt *s) {
 	return rtv;
 }
 
-std::unique_ptr<IR_stmt_types::Dirty>
-IR_stmt_types::Dirty::from_c(const IRStmt *s) {
-	auto rtv = std::make_unique<Dirty>();
+std::unique_ptr<IR_stmt_types::dirty>
+IR_stmt_types::dirty::from_c(const IRStmt *s) {
+	auto rtv = std::make_unique<dirty>();
 
 	rtv->tag = Ist_Dirty;
-	rtv->details = IR_dirty_xx::from_c(s->Ist.Dirty.details);
 
-	return rtv;
-}
+	auto *det = s->Ist.Dirty.details;
+	rtv->cee = IR_callee_xx::from_c(det->cee);
+	rtv->guard = IR_expr_xx::from_c(det->guard);
 
-std::unique_ptr<IR_dirty_xx> IR_dirty_xx::from_c(const IRDirty *s) {
-	auto d2 = std::make_unique<IR_dirty_xx>();
-
-	d2->cee = IR_callee_xx::from_c(s->cee);
-	d2->guard = IR_expr_xx::from_c(s->guard);
-
-	for (auto i = 0; s->args[i]; ++i) {
-		d2->args.push_back(IR_expr_xx::from_c(s->args[i]));
+	for (auto i = 0; det->args[i]; ++i) {
+		rtv->args.push_back(IR_expr_xx::from_c(det->args[i]));
 	}
 
-	d2->tmp = s->tmp;
-	d2->m_fx = s->mFx;
-	if (s->mAddr) {
-		d2->m_addr = IR_expr_xx::from_c(s->mAddr);
+	rtv->tmp = det->tmp;
+	rtv->m_fx = det->mFx;
+	if (det->mAddr) {
+		rtv->m_addr = IR_expr_xx::from_c(det->mAddr);
 	}
-	d2->m_size = s->mSize;
-	d2->n_fx_state = s->nFxState;
+	rtv->m_size = det->mSize;
+	rtv->n_fx_state = det->nFxState;
 
-	for (auto i = 0; i < d2->n_fx_state; ++i) {
-		auto &&l = d2->fx_state[i];
-		auto &&r = s->fxState[i];
+	for (auto i = 0; i < rtv->n_fx_state; ++i) {
+		auto &&l = rtv->fx_state[i];
+		auto &&r = det->fxState[i];
 
 		l.fx = r.fx;
 		l.offset = r.offset;
@@ -242,8 +274,44 @@ std::unique_ptr<IR_dirty_xx> IR_dirty_xx::from_c(const IRDirty *s) {
 		l.repeat_len = r.repeatLen;
 	}
 
-	return d2;
+	// rtv->details = IR_dirty_xx::from_c(s->Ist.Dirty.details);
+
+	return rtv;
 }
+
+/*
+std::unique_ptr<IR_dirty_xx> IR_dirty_xx::from_c(const IRDirty *s) {
+    auto d2 = std::make_unique<IR_dirty_xx>();
+
+    d2->cee = IR_callee_xx::from_c(s->cee);
+    d2->guard = IR_expr_xx::from_c(s->guard);
+
+    for (auto i = 0; s->args[i]; ++i) {
+        d2->args.push_back(IR_expr_xx::from_c(s->args[i]));
+    }
+
+    d2->tmp = s->tmp;
+    d2->m_fx = s->mFx;
+    if (s->mAddr) {
+        d2->m_addr = IR_expr_xx::from_c(s->mAddr);
+    }
+    d2->m_size = s->mSize;
+    d2->n_fx_state = s->nFxState;
+
+    for (auto i = 0; i < d2->n_fx_state; ++i) {
+        auto &&l = d2->fx_state[i];
+        auto &&r = s->fxState[i];
+
+        l.fx = r.fx;
+        l.offset = r.offset;
+        l.size = r.size;
+        l.n_repeats = r.nRepeats;
+        l.repeat_len = r.repeatLen;
+    }
+
+    return d2;
+}
+*/
 
 std::unique_ptr<IR_stmt_types::MBE>
 IR_stmt_types::MBE::from_c(const IRStmt *s) {
@@ -255,9 +323,9 @@ IR_stmt_types::MBE::from_c(const IRStmt *s) {
 	return rtv;
 }
 
-std::unique_ptr<IR_stmt_types::Exit>
-IR_stmt_types::Exit::from_c(const IRStmt *s) {
-	auto rtv = std::make_unique<Exit>();
+std::unique_ptr<IR_stmt_types::exit>
+IR_stmt_types::exit::from_c(const IRStmt *s) {
+	auto rtv = std::make_unique<exit>();
 
 	rtv->tag = Ist_Exit;
 	rtv->guard = IR_expr_xx::from_c(s->Ist.Exit.guard);
@@ -280,22 +348,22 @@ std::unique_ptr<IR_stmt_xx> IR_stmt_xx::from_c(const IRStmt *s) {
 		return IR_stmt_types::I_mark::from_c(s);
 	}
 	case Ist_Put: {
-		return IR_stmt_types::Put::from_c(s);
+		return IR_stmt_types::put::from_c(s);
 	}
 	case Ist_PutI: {
-		return IR_stmt_types::Put_I::from_c(s);
+		return IR_stmt_types::put_I::from_c(s);
 	}
 	case Ist_WrTmp: {
 		return IR_stmt_types::wr_tmp::from_c(s);
 	}
 	case Ist_Store: {
-		return IR_stmt_types::Store::from_c(s);
+		return IR_stmt_types::store::from_c(s);
 	}
 	case Ist_StoreG: {
 		return IR_stmt_types::store_G::from_c(s);
 	}
 	case Ist_LoadG: {
-		return IR_stmt_types::load_g::from_c(s);
+		return IR_stmt_types::load_G::from_c(s);
 	}
 	case Ist_CAS: {
 		return IR_stmt_types::CAS::from_c(s);
@@ -304,13 +372,13 @@ std::unique_ptr<IR_stmt_xx> IR_stmt_xx::from_c(const IRStmt *s) {
 		return IR_stmt_types::LLSC::from_c(s);
 	}
 	case Ist_Dirty: {
-		return IR_stmt_types::Dirty::from_c(s);
+		return IR_stmt_types::dirty::from_c(s);
 	}
 	case Ist_MBE: {
 		return IR_stmt_types::MBE::from_c(s);
 	}
 	case Ist_Exit: {
-		return IR_stmt_types::Exit::from_c(s);
+		return IR_stmt_types::exit::from_c(s);
 	}
 	default:
 		throw "IR_stmt_xx::from_c";
@@ -472,10 +540,15 @@ std::ostream &IRSB_xx::pretty_print(std::ostream &os) const {
 		s->pretty_print(os);
 		os << "\n";
 	}
-	os << "   PUT(" << this->offsIP << ") = ";
-	this->next->pretty_print(os);
+	os << "\tPUT(" << this->offsIP << ") = "<<*next;
 	os << "; exit-" << this->jumpkind;
 	os << "\n}\n";
+}
+
+std::ostream &operator<<(std::ostream &os, const IRSB_xx &irsb){
+	irsb.pretty_print(os);
+
+	return os;
 }
 
 std::ostream &IR_type_env_xx::pretty_print(std::ostream &os) const {
@@ -488,28 +561,33 @@ std::ostream &IR_type_env_xx::pretty_print(std::ostream &os) const {
 std::ostream &operator<<(std::ostream &os, const IR_stmt_xx &stmt) {
 	return stmt.pretty_print(os);
 }
+
+/*
 std::ostream &operator<<(std::ostream &os, const IRRegArray &arr) {
-	os << '(' << arr.base << ':' << arr.nElems << 'x' << arr.elemTy << ')';
+	os << "(" << arr.base << ":" << arr.nElems << "x" << arr.elemTy << ")";
 
 	return os;
 }
+*/
 
+/*
 std::ostream &IR_put_I_xx::pretty_print(std::ostream &os) const {
-	os << "PUTI" << this->descr << '[';
-	this->ix->pretty_print(os);
-	os << ',' << this->bias << "] = ";
-	this->data->pretty_print(os);
+    os << "PUTI" << this->descr << "[";
+    this->ix->pretty_print(os);
+    os << "," << this->bias << "] = ";
+    this->data->pretty_print(os);
 
-	return os;
+    return os;
 }
 
 std::ostream &IR_store_G_xx::pretty_print(std::ostream &os) const {
-	os << "if (" << *this->guard << ") { ST";
-	os << this->end << '(';
-	os << *this->addr << ") = " << *this->data << " }";
+    os << "if (" << *this->guard << ") { ST";
+    os << this->end << "(";
+    os << *this->addr << ") = " << *this->data << " }";
 
-	return os;
+    return os;
 }
+*/
 
 std::ostream &operator<<(std::ostream &os, IRLoadGOp cvt) {
 	switch (cvt) {
@@ -544,50 +622,55 @@ std::ostream &operator<<(std::ostream &os, IRLoadGOp cvt) {
 	return os;
 }
 
+/*
 std::ostream &IR_load_G_xx::pretty_print(std::ostream &os) const {
-	os << this->dst << " = if-strict (" << *this->guard << ") " << this->cvt;
-	os << "(LD" << this->end << "(" << *this->addr << ")) else ";
-	os << *this->alt;
+    os << this->dst << " = if-strict (" << *this->guard << ") " << this->cvt;
+    os << "(LD" << this->end << "(" << *this->addr << ")) else ";
+    os << *this->alt;
 
-	return os;
+    return os;
 }
+*/
+
 std::ostream &operator<<(std::ostream &os, IREndness e) {
 	os << (e == Iend_LE) ? "le" : "be";
 	return os;
 }
 
+/*
 std::ostream &IR_CAS_xx ::pretty_print(std::ostream &os) const {
-	if (this->old_hi != IRTemp_INVALID) {
-		os << this->old_hi << ',';
-	}
+    if (this->old_hi != IRTemp_INVALID) {
+        os << this->old_hi << ",";
+    }
 
-	os << this->old_lo << " = =CAS" << this->end << '(' << *this->addr << "::";
-	if (this->expd_hi) {
-		os << *this->expd_hi << ',';
-	}
-	os << *this->expd_lo << "->";
-	if (this->data_hi) {
-		os << *this->data_hi << ',';
-	}
-	os << *this->data_lo << ')';
+    os << this->old_lo << " = =CAS" << this->end << "(" << *this->addr << "::";
+    if (this->expd_hi) {
+        os << *this->expd_hi << ",";
+    }
+    os << *this->expd_lo << "->";
+    if (this->data_hi) {
+        os << *this->data_hi << ",";
+    }
+    os << *this->data_lo << ")";
 
-	return os;
+    return os;
 }
+*/
 
 std::ostream &operator<<(std::ostream &os, IREffect fx) {
 	switch (fx) {
 	case Ifx_None:
 		os << "noFX";
-		return;
+		return os;
 	case Ifx_Read:
 		os << "RdFX";
-		return;
+		return os;
 	case Ifx_Write:
 		os << "WrFX";
-		return;
+		return os;
 	case Ifx_Modify:
 		os << "MoFX";
-		return;
+		return os;
 	default:
 		throw "ppIREffect";
 	}
@@ -595,38 +678,56 @@ std::ostream &operator<<(std::ostream &os, IREffect fx) {
 	return os;
 }
 
+/*
 std::ostream &IR_dirty_xx::pretty_print(std::ostream &os) const {
-	if (tmp != IRTemp_INVALID) {
-		os << tmp << " = ";
+    if (tmp != IRTemp_INVALID) {
+        os << tmp << " = ";
+    }
+    os << "DIRTY " << *guard;
+    if (m_fx != Ifx_None) {
+        os << m_fx << "-mem(" << *m_addr << "," << m_size << ")";
+    }
+
+    for (auto i = 0; i < n_fx_state; ++i) {
+        auto &&s = fx_state[i];
+
+        os << " " << s.fx << "-gst(" << s.offset << "," << s.size;
+
+        if (s.n_repeats > 0) {
+            os << ",reps" << static_cast<unsigned>(s.n_repeats) << ",step"
+               << static_cast<unsigned>(s.repeat_len);
+        }
+
+        os << ")";
+    }
+
+    os << " ::: ";
+    cee->pretty_print(os);
+    os << "(";
+    for (auto &&e : args) {
+        os << *e << ",";
+    }
+    os << ")";
+
+    return os;
+}
+*/
+
+std::ostream &operator<<(std::ostream &os, IRMBusEvent eve) {
+	switch (eve) {
+	case Imbe_Fence:
+		os << "Fence";
+		break;
+	case Imbe_CancelReservation:
+		os << "CancelReservation";
+		break;
+	default:
+		throw "ppIRMBusEvent";
 	}
-	os << "DIRTY " << *guard;
-	if (m_fx != Ifx_None) {
-		os << m_fx << "-mem(" << *m_addr << ',' << m_size << ')';
-	}
-
-	for (auto i = 0; i < n_fx_state; ++i) {
-		auto &&s = fx_state[i];
-
-		os << ' ' << s.fx << "-gst(" << s.offset << ',' << s.size;
-
-		if (s.n_repeats > 0) {
-			os << ",reps" << static_cast<unsigned>(s.n_repeats) << ",step"
-			   << static_cast<unsigned>(s.repeat_len);
-		}
-
-		os << ')';
-	}
-
-	os << " ::: ";
-	cee->pretty_print(os);
-	os << '(';
-	for (auto &&e : args) {
-		os << *e << ',';
-	}
-	os << ')';
 
 	return os;
 }
+
 namespace IR_stmt_types {
 
 std::ostream &no_op::pretty_print(std::ostream &os) const {
@@ -634,23 +735,129 @@ std::ostream &no_op::pretty_print(std::ostream &os) const {
 }
 
 std::ostream &I_mark::pretty_print(std::ostream &os) const {
-	os<<"------ IMark("<<std::hex<<addr<<std::dec<<", "<<len
-		<<", "<<static_cast<unsigned>(delta)<<')';
+	os << "------ IMark(0x" << std::hex << addr << std::dec << ", " << len << ", "
+	   << static_cast<unsigned>(delta) << ")";
 	return os;
 }
 
 std::ostream &ABI_hint::pretty_print(std::ostream &os) const {
-	os<<"====== AbiHint("<<*base<<", "<<len<<", "<<*nia<<") ======";
+	os << "====== AbiHint(" << *base << ", " << len << ", " << *nia
+	   << ") ======";
 	return os;
 }
 
-std::ostream &Put::pretty_print(std::ostream &os) const {
-	os<<"PUT("<<offset<<") = "<<*data;
+std::ostream &put::pretty_print(std::ostream &os) const {
+	os << "PUT(" << offset << ") = " << *data;
 	return os;
 }
 
-std::ostream &Put_I::pretty_print(std::ostream &os) const {
-	os<<*details;
+std::ostream &put_I::pretty_print(std::ostream &os) const {
+	os << "PUTI" << this->descr << "[";
+	this->ix->pretty_print(os);
+	os << "," << this->bias << "] = ";
+	this->data->pretty_print(os);
+
+	return os;
+}
+
+std::ostream &wr_tmp::pretty_print(std::ostream &os) const {
+	os << tmp << " = " << *data;
+
+	return os;
+}
+std::ostream &store::pretty_print(std::ostream &os) const {
+	os << "ST" << end << "(" << *addr << ") = " << *data;
+
+	return os;
+}
+
+std::ostream &store_G::pretty_print(std::ostream &os) const {
+	os << "if (" << *this->guard << ") { ST";
+	os << this->end << "(";
+	os << *this->addr << ") = " << *this->data << " }";
+
+	return os;
+}
+
+std::ostream &load_G::pretty_print(std::ostream &os) const {
+	os << this->dst << " = if-strict (" << *this->guard << ") " << this->cvt;
+	os << "(LD" << this->end << "(" << *this->addr << ")) else ";
+	os << *this->alt;
+
+	return os;
+}
+
+std::ostream &CAS::pretty_print(std::ostream &os) const {
+	if (this->old_hi != IRTemp_INVALID) {
+		os << this->old_hi << ",";
+	}
+
+	os << this->old_lo << " = =CAS" << this->end << "(" << *this->addr << "::";
+	if (this->expd_hi) {
+		os << *this->expd_hi << ",";
+	}
+	os << *this->expd_lo << "->";
+	if (this->data_hi) {
+		os << *this->data_hi << ",";
+	}
+	os << *this->data_lo << ")";
+
+	return os;
+}
+std::ostream &LLSC::pretty_print(std::ostream &os) const {
+	if (!store_data) {
+		os << result << " = LD" << end << "-Linked(" << *addr << ")";
+	} else {
+		os << result << " = ( ST" << end << "-Cond(" << *addr
+		   << ") = " << *store_data << " )";
+	}
+
+	return os;
+}
+
+std::ostream &dirty::pretty_print(std::ostream &os) const {
+	if (tmp != IRTemp_INVALID) {
+		os << tmp << " = ";
+	}
+	os << "DIRTY " << *guard;
+	if (m_fx != Ifx_None) {
+		os << m_fx << "-mem(" << *m_addr << "," << m_size << ")";
+	}
+
+	for (auto i = 0; i < n_fx_state; ++i) {
+		auto &&s = fx_state[i];
+
+		os << " " << s.fx << "-gst(" << s.offset << "," << s.size;
+
+		if (s.n_repeats > 0) {
+			os << ",reps" << static_cast<unsigned>(s.n_repeats) << ",step"
+			   << static_cast<unsigned>(s.repeat_len);
+		}
+
+		os << ")";
+	}
+
+	os << " ::: ";
+	cee->pretty_print(os);
+	os << "(";
+	for (auto &&e : args) {
+		os << *e << ",";
+	}
+	os << ")";
+
+	return os;
+}
+std::ostream &MBE::pretty_print(std::ostream &os) const {
+	os<<"IR-"<<event;
+
+	return os;
+}
+
+std::ostream &exit::pretty_print(std::ostream &os) const{
+	os<<"if ("<<*guard<<") { PUT("<<offs_IP<<") = ";
+	dst->pretty_print(os);
+	os<<"; exit-"<<jk<<" } ";
+
 	return os;
 }
 

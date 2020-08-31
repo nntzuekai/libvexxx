@@ -1,11 +1,13 @@
 #include "IR_expr_xx.h"
 
-#include <vector>
 #include <cassert>
+#include <cstdint>
 #include <cstring>
+#include <iomanip>
+#include <ostream>
+#include <vector>
 
 namespace libvexxx {
-
 
 std::unique_ptr<IR_const_xx> IR_const_xx::from_c(const IRConst *s) {
 	auto rtv = std::make_unique<IR_const_xx>();
@@ -35,7 +37,6 @@ std::unique_ptr<IR_callee_xx> IR_callee_xx::from_c(const IRCallee *ce) {
 	return ce2;
 }
 
-
 void copy_IRRegArray(IRRegArray *dst, const IRRegArray *src) {
 	*dst = *src;
 
@@ -47,11 +48,11 @@ void copy_IRRegArray(IRRegArray *dst, const IRRegArray *src) {
 std::unique_ptr<IR_expr_xx> IR_expr_xx::from_c(const IRExpr *e) {
 	switch (e->tag) {
 	case Iex_Get:
-		return ir_expr_types::Get::from_c(e);
+		return ir_expr_types::get_R::from_c(e);
 	case Iex_GetI:
-		return ir_expr_types::Get_I::from_c(e);
+		return ir_expr_types::get_I::from_c(e);
 	case Iex_RdTmp:
-		return ir_expr_types::Rd_tmp::from_c(e);
+		return ir_expr_types::rd_tmp::from_c(e);
 	case Iex_Qop:
 		return ir_expr_types::Q_op::from_c(e);
 	case Iex_Triop:
@@ -63,7 +64,7 @@ std::unique_ptr<IR_expr_xx> IR_expr_xx::from_c(const IRExpr *e) {
 	case Iex_Load:
 		return ir_expr_types::load::from_c(e);
 	case Iex_Const:
-		return ir_expr_types::Const::from_c(e);
+		return ir_expr_types::constant::from_c(e);
 	case Iex_CCall:
 		return ir_expr_types::C_call::from_c(e);
 	case Iex_ITE:
@@ -73,7 +74,7 @@ std::unique_ptr<IR_expr_xx> IR_expr_xx::from_c(const IRExpr *e) {
 	case Iex_GSPTR:
 		return ir_expr_types::GSPTR::from_c(e);
 	case Iex_Binder:
-		return ir_expr_types::Binder::from_c(e);
+		return ir_expr_types::binder::from_c(e);
 	default:
 		throw "IR_expr_xx::from_c";
 	}
@@ -81,17 +82,17 @@ std::unique_ptr<IR_expr_xx> IR_expr_xx::from_c(const IRExpr *e) {
 
 namespace ir_expr_types {
 
-std::unique_ptr<Binder> Binder::from_c(const IRExpr *e) {
-	auto rtv = std::make_unique<Binder>();
+std::unique_ptr<binder> binder::from_c(const IRExpr *e) {
+	auto rtv = std::make_unique<binder>();
 
 	rtv->tag = Iex_Binder;
-	rtv->binder = e->Iex.Binder.binder;
+	rtv->bd = e->Iex.Binder.binder;
 
 	return rtv;
 }
 
-std::unique_ptr<Get> Get::from_c(const IRExpr *e) {
-	auto rtv = std::make_unique<Get>();
+std::unique_ptr<get_R> get_R::from_c(const IRExpr *e) {
+	auto rtv = std::make_unique<get_R>();
 
 	rtv->tag = Iex_Get;
 	rtv->offset = e->Iex.Get.offset;
@@ -100,8 +101,8 @@ std::unique_ptr<Get> Get::from_c(const IRExpr *e) {
 	return rtv;
 }
 
-std::unique_ptr<Get_I> Get_I::from_c(const IRExpr *e) {
-	auto rtv = std::make_unique<Get_I>();
+std::unique_ptr<get_I> get_I::from_c(const IRExpr *e) {
+	auto rtv = std::make_unique<get_I>();
 
 	rtv->tag = Iex_GetI;
 	copy_IRRegArray(&(rtv->descr), e->Iex.GetI.descr);
@@ -111,8 +112,8 @@ std::unique_ptr<Get_I> Get_I::from_c(const IRExpr *e) {
 	return rtv;
 }
 
-std::unique_ptr<Rd_tmp> Rd_tmp::from_c(const IRExpr *e) {
-	auto rtv = std::make_unique<Rd_tmp>();
+std::unique_ptr<rd_tmp> rd_tmp::from_c(const IRExpr *e) {
+	auto rtv = std::make_unique<rd_tmp>();
 
 	rtv->tag = Iex_RdTmp;
 	rtv->tmp = e->Iex.RdTmp.tmp;
@@ -176,21 +177,21 @@ std::unique_ptr<un_op> un_op::from_c(const IRExpr *e) {
 std::unique_ptr<load> load::from_c(const IRExpr *e) {
 	auto rtv = std::make_unique<load>();
 
-	rtv->tag =Iex_Load;
-	rtv->end=e->Iex.Load.end;
-	rtv->ty=e->Iex.Load.ty;
-	rtv->addr=IR_expr_xx::from_c(e->Iex.Load.addr);
+	rtv->tag = Iex_Load;
+	rtv->end = e->Iex.Load.end;
+	rtv->ty = e->Iex.Load.ty;
+	rtv->addr = IR_expr_xx::from_c(e->Iex.Load.addr);
 
-	assert(rtv->end==Iend_LE||rtv->end==Iend_BE);
-	
+	assert(rtv->end == Iend_LE || rtv->end == Iend_BE);
+
 	return rtv;
 }
 
-std::unique_ptr<Const> Const::from_c(const IRExpr *e) {
-	auto rtv = std::make_unique<Const>();
+std::unique_ptr<constant> constant::from_c(const IRExpr *e) {
+	auto rtv = std::make_unique<constant>();
 
-	rtv->tag =Iex_Const;
-	rtv->con=IR_const_xx::from_c(e->Iex.Const.con);
+	rtv->tag = Iex_Const;
+	rtv->con = IR_const_xx::from_c(e->Iex.Const.con);
 
 	return rtv;
 }
@@ -198,9 +199,9 @@ std::unique_ptr<Const> Const::from_c(const IRExpr *e) {
 std::unique_ptr<C_call> C_call::from_c(const IRExpr *e) {
 	auto rtv = std::make_unique<C_call>();
 
-	rtv->tag =Iex_CCall;
-	rtv->cee=IR_callee_xx::from_c(e->Iex.CCall.cee);
-	rtv->ret_ty=e->Iex.CCall.retty;
+	rtv->tag = Iex_CCall;
+	rtv->cee = IR_callee_xx::from_c(e->Iex.CCall.cee);
+	rtv->ret_ty = e->Iex.CCall.retty;
 
 	for (auto i = 0; e->Iex.CCall.args[i]; ++i) {
 		rtv->args.push_back(IR_expr_xx::from_c(e->Iex.CCall.args[i]));
@@ -212,10 +213,10 @@ std::unique_ptr<C_call> C_call::from_c(const IRExpr *e) {
 std::unique_ptr<ITE> ITE::from_c(const IRExpr *e) {
 	auto rtv = std::make_unique<ITE>();
 
-	rtv->tag =Iex_ITE;
-	rtv->cond=IR_expr_xx::from_c(e->Iex.ITE.cond);
-	rtv->if_true=IR_expr_xx::from_c(e->Iex.ITE.iftrue);
-	rtv->if_false=IR_expr_xx::from_c(e->Iex.ITE.iffalse);
+	rtv->tag = Iex_ITE;
+	rtv->cond = IR_expr_xx::from_c(e->Iex.ITE.cond);
+	rtv->if_true = IR_expr_xx::from_c(e->Iex.ITE.iftrue);
+	rtv->if_false = IR_expr_xx::from_c(e->Iex.ITE.iffalse);
 
 	return rtv;
 }
@@ -223,7 +224,7 @@ std::unique_ptr<ITE> ITE::from_c(const IRExpr *e) {
 std::unique_ptr<VECRET> VECRET::from_c(const IRExpr *e) {
 	auto rtv = std::make_unique<VECRET>();
 
-	rtv->tag =Iex_VECRET;
+	rtv->tag = Iex_VECRET;
 
 	return rtv;
 }
@@ -231,17 +232,174 @@ std::unique_ptr<VECRET> VECRET::from_c(const IRExpr *e) {
 std::unique_ptr<GSPTR> GSPTR::from_c(const IRExpr *e) {
 	auto rtv = std::make_unique<GSPTR>();
 
-	rtv->tag =Iex_GSPTR;
+	rtv->tag = Iex_GSPTR;
 
 	return rtv;
 }
 
-
 } // namespace ir_expr_types
 
-
-std::ostream& operator<<(std::ostream &os, const IR_expr_xx &e){
+std::ostream &operator<<(std::ostream &os, const IR_expr_xx &e) {
 	return e.pretty_print(os);
 }
+
+std::ostream &IR_callee_xx::pretty_print(std::ostream &os) const {
+	os << name;
+	if (regparms > 0) {
+		os << "[rp=" << regparms << "]";
+	}
+	if (mcx_mask > 0) {
+		os << "[mcx=0x" << std::hex << mcx_mask << std::dec << "]";
+	}
+
+	os << "{" << addr << "}";
+
+	return os;
+}
+
+std::ostream &operator<<(std::ostream &os, const IR_callee_xx &cee){
+	cee.pretty_print(os);
+
+	return os;
+}
+
+
+std::ostream &operator<<(std::ostream &os, const IRRegArray &arr){
+	os<<"("<<arr.base<<":"<<arr.nElems<<"x"<<arr.elemTy<<")";
+
+	return os;
+}
+
+std::ostream& operator<<(std::ostream &os, const IR_const_xx &e){
+	e.pretty_print(os);
+
+	return os;
+}
+
+std::ostream &IR_const_xx::pretty_print(std::ostream &os) const {
+	switch (tag) {
+	case Ico_U1:
+		os << static_cast<unsigned>(Ico.U1) << ":I1";
+		break;
+	case Ico_U8:
+		os << "0x" << std::hex << static_cast<uint8_t>(Ico.U8) << std::dec
+		   << ":I8";
+		break;
+	case Ico_U16:
+		os << "0x" << std::hex << static_cast<uint16_t>(Ico.U16) << std::dec
+		   << ":I16";
+		break;
+	case Ico_U32:
+		os << "0x" << std::hex << static_cast<uint32_t>(Ico.U32) << std::dec
+		   << ":I32";
+		break;
+	case Ico_U64:
+		os << "0x" << std::hex << static_cast<uint64_t>(Ico.U64) << std::dec
+		   << ":I64";
+		break;
+	case Ico_F32:
+		os << "F32{0x" << std::hex << Ico.F32i << std::dec << "," << Ico.F32
+		   << "}";
+		break;
+	case Ico_F32i:
+		os << "F32i{0x" << std::hex << Ico.F32i << std::dec << "}";
+		break;
+	case Ico_F64:
+		os << "F64{0x" << std::hex << Ico.F64i << std::dec << "," << Ico.F64
+		   << "}";
+		break;
+	case Ico_F64i:
+		os << "F64i{0x" << std::hex << Ico.F64i << std::dec << "}";
+		break;
+	case Ico_V128:
+		os << "V128{0x" << std::hex << Ico.V128 << std::dec << "}";
+		break;
+	case Ico_V256:
+		os << "V256{0x" << std::hex << Ico.V256 << std::dec << "}";
+		break;
+	default:
+		throw "ppIRConst";
+	}
+
+	return os;
+}
+
+namespace ir_expr_types {
+
+std::ostream &binder::pretty_print(std::ostream &os) const {
+	os<<"BIND-"<<bd;
+	return os;
+}
+
+std::ostream &get_R::pretty_print(std::ostream &os) const {
+	os<<"GET:"<<ty<<"("<<offset<<")";
+	return os;
+}
+
+std::ostream &get_I::pretty_print(std::ostream &os) const {
+	os<<"GETI"<<descr<<"["<<*ix<<","<<bias<<"]";
+	return os;
+}
+
+std::ostream &rd_tmp::pretty_print(std::ostream &os) const {
+	os<<tmp;
+	return os;
+}
+
+std::ostream &Q_op::pretty_print(std::ostream &os) const {
+	os<<op<<"("<<*arg1<<","<<*arg2<<","<<*arg3<<","<<*arg4<<")";
+	return os;
+}
+
+std::ostream &tri_op::pretty_print(std::ostream &os) const {
+	os<<op<<"("<<*arg1<<","<<*arg2<<","<<*arg3<<")";
+	return os;
+}
+
+std::ostream &bin_op::pretty_print(std::ostream &os) const {
+	os<<op<<"("<<*arg1<<","<<*arg2<<")";
+	return os;
+}
+
+std::ostream &un_op::pretty_print(std::ostream &os) const {
+	os<<op<<"("<<*arg<<")";
+	return os;
+}
+
+std::ostream &load::pretty_print(std::ostream &os) const {
+	os<<"LD"<<end<<":"<<ty<<"("<<*addr<<")";
+	return os;
+}
+
+std::ostream &constant::pretty_print(std::ostream &os) const {
+	os<<*con;
+	return os;
+}
+
+std::ostream &C_call::pretty_print(std::ostream &os) const {
+	os<<*cee<<"(";
+	for(auto &&arg:args){
+		os<<*arg<<",";
+	}
+	os<<"):"<<ret_ty;
+	return os;
+}
+
+std::ostream &ITE::pretty_print(std::ostream &os) const {
+	os<<"ITE("<<*cond<<","<<*if_true<<","<<*if_false<<")";
+	return os;
+}
+
+std::ostream &VECRET::pretty_print(std::ostream &os) const {
+	os<<"VECRET";
+	return os;
+}
+
+std::ostream &GSPTR::pretty_print(std::ostream &os) const {
+	os<<"GSPTR";
+	return os;
+}
+
+} // namespace ir_expr_types
 
 } // namespace libvexxx
