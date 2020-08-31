@@ -1,10 +1,13 @@
+#pragma once
+
 #ifndef LIBVEXXXX_INCLUDED
 #define LIBVEXXXX_INCLUDED
 
 extern "C" {
-#include "pyvex.h"
-// #include "libvex.h"
+// #include "pyvex.h"
+#include "libvex.h"
 }
+#include "IR_enums.h"
 #include "IR_expr_xx.h"
 
 #include <cassert>
@@ -15,16 +18,8 @@ extern "C" {
 
 namespace libvexxx {
 
-std::ostream &operator<<(std::ostream &os, IRJumpKind kind);
-std::ostream &operator<<(std::ostream &os, IRType kind);
-// std::ostream &operator<<(std::ostream &os, const IRRegArray &arr);
-std::ostream &operator<<(std::ostream &os, IRLoadGOp cvt);
-std::ostream &operator<<(std::ostream &os, IREndness e);
-std::ostream &operator<<(std::ostream &os, IREffect fx);
-std::ostream &operator<<(std::ostream &os, IRMBusEvent eve);
-
 struct IR_type_env_xx {
-	std::vector<::IRType> envs;
+	std::vector<IR_type_xx> envs;
 
 	static std::unique_ptr<IR_type_env_xx> from_c(const IRTypeEnv *src);
 
@@ -43,7 +38,7 @@ struct IR_put_I_xx {
 };
 
 struct IR_store_G_xx {
-    IREndness end;
+    IR_endness_xx end;
     std::unique_ptr<IR_expr_xx> addr;
     std::unique_ptr<IR_expr_xx> data;
     std::unique_ptr<IR_expr_xx> guard;
@@ -53,9 +48,9 @@ struct IR_store_G_xx {
 };
 
 struct IR_load_G_xx {
-    IREndness end;
-    IRLoadGOp cvt;
-    IRTemp dst;
+    IR_endness_xx end;
+    IR_load_G_op_xx cvt;
+    IR_temp_xx dst;
     std::unique_ptr<IR_expr_xx> addr;
     std::unique_ptr<IR_expr_xx> alt;
     std::unique_ptr<IR_expr_xx> guard;
@@ -65,9 +60,9 @@ struct IR_load_G_xx {
 };
 
 struct IR_CAS_xx {
-    IRTemp old_hi;
-    IRTemp old_lo;
-    IREndness end;
+    IR_temp_xx old_hi;
+    IR_temp_xx old_lo;
+    IR_endness_xx end;
     std::unique_ptr<IR_expr_xx> addr;
     std::unique_ptr<IR_expr_xx> expd_hi;
     std::unique_ptr<IR_expr_xx> expd_lo;
@@ -83,16 +78,16 @@ struct IR_dirty_xx {
 
     std::unique_ptr<IR_expr_xx> guard;
     std::vector<std::unique_ptr<IR_expr_xx>> args;
-    IRTemp tmp = IRTemp_INVALID;
+    IR_temp_xx tmp = IR_temp_xx_INVALID;
 
-    IREffect m_fx = Ifx_None;
+    IR_effect_xx m_fx = Ifx_None;
     std::unique_ptr<IR_expr_xx> m_addr;
     Int m_size = 0;
 
     Int n_fx_state = 0;
 
     struct t_fx_state {
-        IREffect fx;
+        IR_effect_xx fx;
         UShort offset;
         UShort size;
         UChar n_repeats;
@@ -158,7 +153,7 @@ struct put_I : public IR_stmt_xx {
 };
 
 struct wr_tmp : public IR_stmt_xx {
-	IRTemp tmp;
+	IR_temp_xx tmp;
 	std::unique_ptr<IR_expr_xx> data;
 
 	std::ostream &pretty_print(std::ostream &os) const override;
@@ -166,7 +161,7 @@ struct wr_tmp : public IR_stmt_xx {
 };
 
 struct store : public IR_stmt_xx {
-	IREndness end;
+	IR_endness_xx end;
 	std::unique_ptr<IR_expr_xx> addr;
 	std::unique_ptr<IR_expr_xx> data;
 
@@ -175,7 +170,7 @@ struct store : public IR_stmt_xx {
 };
 
 struct store_G : public IR_stmt_xx {
-	IREndness end;
+	IR_endness_xx end;
 	std::unique_ptr<IR_expr_xx> addr;
 	std::unique_ptr<IR_expr_xx> data;
 	std::unique_ptr<IR_expr_xx> guard;
@@ -185,9 +180,9 @@ struct store_G : public IR_stmt_xx {
 };
 
 struct load_G : public IR_stmt_xx {
-	IREndness end;
-	IRLoadGOp cvt;
-	IRTemp dst;
+	IR_endness_xx end;
+	IR_load_G_op_xx cvt;
+	IR_temp_xx dst;
 	std::unique_ptr<IR_expr_xx> addr;
 	std::unique_ptr<IR_expr_xx> alt;
 	std::unique_ptr<IR_expr_xx> guard;
@@ -198,9 +193,9 @@ struct load_G : public IR_stmt_xx {
 };
 
 struct CAS : public IR_stmt_xx {
-	IRTemp old_hi;
-	IRTemp old_lo;
-	IREndness end;
+	IR_temp_xx old_hi;
+	IR_temp_xx old_lo;
+	IR_endness_xx end;
 	std::unique_ptr<IR_expr_xx> addr;
 	std::unique_ptr<IR_expr_xx> expd_hi;
 	std::unique_ptr<IR_expr_xx> expd_lo;
@@ -214,8 +209,8 @@ struct CAS : public IR_stmt_xx {
 };
 
 struct LLSC : public IR_stmt_xx {
-	IREndness end;
-	IRTemp result;
+	IR_endness_xx end;
+	IR_temp_xx result;
 	std::unique_ptr<IR_expr_xx> addr;
 	std::unique_ptr<IR_expr_xx> store_data;
 
@@ -228,16 +223,16 @@ struct dirty : public IR_stmt_xx {
 
 	std::unique_ptr<IR_expr_xx> guard;
 	std::vector<std::unique_ptr<IR_expr_xx>> args;
-	IRTemp tmp = IRTemp_INVALID;
+	IR_temp_xx tmp = IR_temp_xx::invalid;
 
-	IREffect m_fx = Ifx_None;
+	IR_effect_xx m_fx = IR_effect_xx::Ifx_None;
 	std::unique_ptr<IR_expr_xx> m_addr;
 	Int m_size = 0;
 
 	Int n_fx_state = 0;
 
 	struct t_fx_state {
-		IREffect fx;
+		IR_effect_xx fx;
 		UShort offset;
 		UShort size;
 		UChar n_repeats;
@@ -253,7 +248,7 @@ struct dirty : public IR_stmt_xx {
 };
 
 struct MBE : public IR_stmt_xx {
-	IRMBusEvent event;
+	IR_MBUS_event_xx event;
 
 	std::ostream &pretty_print(std::ostream &os) const override;
 	static std::unique_ptr<MBE> from_c(const IRStmt *s);
@@ -262,7 +257,7 @@ struct MBE : public IR_stmt_xx {
 struct exit : public IR_stmt_xx {
 	std::unique_ptr<IR_expr_xx> guard;
 	std::unique_ptr<IR_const_xx> dst;
-	IRJumpKind jk;
+	IR_jump_kind_xx jk;
 	Int offs_IP;
 
 	std::ostream &pretty_print(std::ostream &os) const override;
@@ -276,7 +271,7 @@ struct IRSB_xx {
 	std::unique_ptr<IR_type_env_xx> tyenv;
 	std::vector<std::unique_ptr<IR_stmt_xx>> stmts;
 	std::unique_ptr<IR_expr_xx> next;
-	IRJumpKind jumpkind;
+	IR_jump_kind_xx jumpkind;
 	Int offsIP;
 
 	static std::unique_ptr<IRSB_xx> from_c(const IRSB *bb);

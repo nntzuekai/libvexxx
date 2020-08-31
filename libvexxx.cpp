@@ -6,7 +6,10 @@ namespace libvexxx {
 std::unique_ptr<IR_type_env_xx> IR_type_env_xx::from_c(const IRTypeEnv *src) {
 	auto rtv = std::make_unique<IR_type_env_xx>();
 
-	rtv->envs.assign(src->types, src->types + src->types_used);
+	rtv->envs.resize(src->types_used);
+	for(auto i=0;i<src->types_used;++i){
+		rtv->envs[i]=IR_type_xx{src->types[i]};
+	}
 
 	return rtv;
 }
@@ -14,7 +17,7 @@ std::unique_ptr<IR_type_env_xx> IR_type_env_xx::from_c(const IRTypeEnv *src) {
 std::unique_ptr<IRSB_xx> IRSB_xx::from_c(const IRSB *bb) {
 	auto rtv = std::make_unique<IRSB_xx>();
 	rtv->tyenv = IR_type_env_xx::from_c(bb->tyenv);
-	rtv->jumpkind = bb->jumpkind;
+	rtv->jumpkind = IR_jump_kind_xx{bb->jumpkind};
 	rtv->offsIP = bb->offsIP;
 	rtv->next = IR_expr_xx::from_c(bb->next);
 
@@ -105,7 +108,7 @@ IR_stmt_types::wr_tmp::from_c(const IRStmt *s) {
 	auto st = std::make_unique<wr_tmp>();
 
 	st->tag = Ist_WrTmp;
-	st->tmp = s->Ist.WrTmp.tmp;
+	st->tmp = IR_temp_xx{s->Ist.WrTmp.tmp};
 	st->data = IR_expr_xx::from_c(s->Ist.WrTmp.data);
 
 	return st;
@@ -116,11 +119,11 @@ IR_stmt_types::store::from_c(const IRStmt *s) {
 	auto st = std::make_unique<store>();
 
 	st->tag = Ist_Store;
-	st->end = s->Ist.Store.end;
+	st->end = IR_endness_xx{s->Ist.Store.end};
 	st->addr = IR_expr_xx::from_c(s->Ist.Store.addr);
 	st->data = IR_expr_xx::from_c(s->Ist.Store.data);
 
-	assert(st->end == Iend_LE || st->end == Iend_BE);
+	assert(st->end == IR_endness_xx::Iend_LE || st->end == IR_endness_xx::Iend_BE);
 
 	return st;
 }
@@ -132,7 +135,7 @@ IR_stmt_types::store_G::from_c(const IRStmt *s) {
 	st->tag = Ist_StoreG;
 
 	auto &&det = s->Ist.StoreG.details;
-	st->end = det->end;
+	st->end = IR_endness_xx{det->end};
 	st->addr = IR_expr_xx::from_c(det->addr);
 	st->data = IR_expr_xx::from_c(det->data);
 	st->guard = IR_expr_xx::from_c(det->guard);
@@ -160,9 +163,9 @@ IR_stmt_types::load_G::from_c(const IRStmt *s) {
 	st->tag = Ist_LoadG;
 
 	auto *det = s->Ist.LoadG.details;
-	st->end = det->end;
-	st->cvt = det->cvt;
-	st->dst = det->dst;
+	st->end = IR_endness_xx{det->end};
+	st->cvt = IR_load_G_op_xx{det->cvt};
+	st->dst = IR_temp_xx{det->dst};
 	st->addr = IR_expr_xx::from_c(det->addr);
 	st->alt = IR_expr_xx::from_c(det->alt);
 	st->guard = IR_expr_xx::from_c(det->guard);
@@ -194,9 +197,9 @@ IR_stmt_types::CAS::from_c(const IRStmt *s) {
 	rtv->tag = Ist_CAS;
 
 	auto *det = s->Ist.CAS.details;
-	rtv->old_hi = det->oldHi;
-	rtv->old_lo = det->oldLo;
-	rtv->end = det->end;
+	rtv->old_hi = IR_temp_xx{det->oldHi};
+	rtv->old_lo = IR_temp_xx{det->oldLo};
+	rtv->end = IR_endness_xx{det->end};
 	rtv->addr = IR_expr_xx::from_c(det->addr);
 	rtv->expd_hi = IR_expr_xx::from_c(det->expdHi);
 	rtv->expd_lo = IR_expr_xx::from_c(det->expdLo);
@@ -231,8 +234,8 @@ IR_stmt_types::LLSC::from_c(const IRStmt *s) {
 	auto &&llsc = s->Ist.LLSC;
 
 	rtv->tag = Ist_LLSC;
-	rtv->end = llsc.end;
-	rtv->result = llsc.result;
+	rtv->end = IR_endness_xx{llsc.end};
+	rtv->result = IR_temp_xx{llsc.result};
 	rtv->addr = IR_expr_xx::from_c(llsc.addr);
 	if (llsc.storedata) {
 		rtv->store_data = IR_expr_xx::from_c(llsc.storedata);
@@ -255,8 +258,8 @@ IR_stmt_types::dirty::from_c(const IRStmt *s) {
 		rtv->args.push_back(IR_expr_xx::from_c(det->args[i]));
 	}
 
-	rtv->tmp = det->tmp;
-	rtv->m_fx = det->mFx;
+	rtv->tmp = IR_temp_xx{det->tmp};
+	rtv->m_fx = IR_effect_xx{det->mFx};
 	if (det->mAddr) {
 		rtv->m_addr = IR_expr_xx::from_c(det->mAddr);
 	}
@@ -267,7 +270,7 @@ IR_stmt_types::dirty::from_c(const IRStmt *s) {
 		auto &&l = rtv->fx_state[i];
 		auto &&r = det->fxState[i];
 
-		l.fx = r.fx;
+		l.fx = IR_effect_xx{r.fx};
 		l.offset = r.offset;
 		l.size = r.size;
 		l.n_repeats = r.nRepeats;
@@ -318,7 +321,7 @@ IR_stmt_types::MBE::from_c(const IRStmt *s) {
 	auto rtv = std::make_unique<MBE>();
 
 	rtv->tag = Ist_MBE;
-	rtv->event = s->Ist.MBE.event;
+	rtv->event = IR_MBUS_event_xx{s->Ist.MBE.event};
 
 	return rtv;
 }
@@ -329,7 +332,7 @@ IR_stmt_types::exit::from_c(const IRStmt *s) {
 
 	rtv->tag = Ist_Exit;
 	rtv->guard = IR_expr_xx::from_c(s->Ist.Exit.guard);
-	rtv->jk = s->Ist.Exit.jk;
+	rtv->jk = IR_jump_kind_xx{s->Ist.Exit.jk};
 	rtv->dst = IR_const_xx::from_c(s->Ist.Exit.dst);
 	rtv->offs_IP = s->Ist.Exit.offsIP;
 
@@ -384,155 +387,10 @@ std::unique_ptr<IR_stmt_xx> IR_stmt_xx::from_c(const IRStmt *s) {
 		throw "IR_stmt_xx::from_c";
 	}
 }
-std::ostream &operator<<(std::ostream &os, IRType ty) {
-	switch (ty) {
-	case Ity_INVALID:
-		os << "Ity_INVALID";
-		break;
-	case Ity_I1:
-		os << "I1";
-		break;
-	case Ity_I8:
-		os << "I8";
-		break;
-	case Ity_I16:
-		os << "I16";
-		break;
-	case Ity_I32:
-		os << "I32";
-		break;
-	case Ity_I64:
-		os << "I64";
-		break;
-	case Ity_I128:
-		os << "I128";
-		break;
-	case Ity_F16:
-		os << "F16";
-		break;
-	case Ity_F32:
-		os << "F32";
-		break;
-	case Ity_F64:
-		os << "F64";
-		break;
-	case Ity_F128:
-		os << "F128";
-		break;
-	case Ity_D32:
-		os << "D32";
-		break;
-	case Ity_D64:
-		os << "D64";
-		break;
-	case Ity_D128:
-		os << "D128";
-		break;
-	case Ity_V128:
-		os << "V128";
-		break;
-	case Ity_V256:
-		os << "V256";
-		break;
-	default:
-		throw "ppIRType ty=" + std::to_string(static_cast<uint>(ty));
-	}
 
-	return os;
-}
-
-std::ostream &operator<<(std::ostream &os, IRJumpKind kind) {
-	switch (kind) {
-	case Ijk_Boring:
-		os << "Boring";
-		break;
-	case Ijk_Call:
-		os << "Call";
-		break;
-	case Ijk_Ret:
-		os << "Return";
-		break;
-	case Ijk_ClientReq:
-		os << "ClientReq";
-		break;
-	case Ijk_Yield:
-		os << "Yield";
-		break;
-	case Ijk_EmWarn:
-		os << "EmWarn";
-		break;
-	case Ijk_EmFail:
-		os << "EmFail";
-		break;
-	case Ijk_NoDecode:
-		os << "NoDecode";
-		break;
-	case Ijk_MapFail:
-		os << "MapFail";
-		break;
-	case Ijk_InvalICache:
-		os << "InvalICache";
-		break;
-	case Ijk_FlushDCache:
-		os << "FlushDCache";
-		break;
-	case Ijk_NoRedir:
-		os << "NoRedir";
-		break;
-	case Ijk_SigILL:
-		os << "SigILL";
-		break;
-	case Ijk_SigTRAP:
-		os << "SigTRAP";
-		break;
-	case Ijk_SigSEGV:
-		os << "SigSEGV";
-		break;
-	case Ijk_SigBUS:
-		os << "SigBUS";
-		break;
-	case Ijk_SigFPE:
-		os << "SigFPE";
-		break;
-	case Ijk_SigFPE_IntDiv:
-		os << "SigFPE_IntDiv";
-		break;
-	case Ijk_SigFPE_IntOvf:
-		os << "SigFPE_IntOvf";
-		break;
-	case Ijk_Sys_syscall:
-		os << "Sys_syscall";
-		break;
-	case Ijk_Sys_int32:
-		os << "Sys_int32";
-		break;
-	case Ijk_Sys_int128:
-		os << "Sys_int128";
-		break;
-	case Ijk_Sys_int129:
-		os << "Sys_int129";
-		break;
-	case Ijk_Sys_int130:
-		os << "Sys_int130";
-		break;
-	case Ijk_Sys_int145:
-		os << "Sys_int145";
-		break;
-	case Ijk_Sys_int210:
-		os << "Sys_int210";
-		break;
-	case Ijk_Sys_sysenter:
-		os << "Sys_sysenter";
-		break;
-	default:
-		throw "ppIRJumpKind";
-	}
-
-	return os;
-}
 
 std::ostream &IRSB_xx::pretty_print(std::ostream &os) const {
-	os << "IRSB {\n";
+	os << "IRSB_xx {\n";
 	this->tyenv->pretty_print(os);
 	os << "\n";
 	for (auto &&s : this->stmts) {
@@ -554,7 +412,7 @@ std::ostream &operator<<(std::ostream &os, const IRSB_xx &irsb){
 std::ostream &IR_type_env_xx::pretty_print(std::ostream &os) const {
 	os << "\t";
 	for (unsigned int i = 0, n = this->envs.size(); i < n; ++i) {
-		os << "t" << i << ":" << envs[i] << "  ";
+		os << IR_temp_xx{i} << ":" << envs[i] << "  ";
 	}
 	return os << '\n';
 }
@@ -589,39 +447,6 @@ std::ostream &IR_store_G_xx::pretty_print(std::ostream &os) const {
 }
 */
 
-std::ostream &operator<<(std::ostream &os, IRLoadGOp cvt) {
-	switch (cvt) {
-	case ILGop_INVALID:
-		os << "ILGop_INVALID";
-		break;
-	case ILGop_IdentV128:
-		os << "IdentV128";
-		break;
-	case ILGop_Ident64:
-		os << "Ident64";
-		break;
-	case ILGop_Ident32:
-		os << "Ident32";
-		break;
-	case ILGop_16Uto32:
-		os << "16Uto32";
-		break;
-	case ILGop_16Sto32:
-		os << "16Sto32";
-		break;
-	case ILGop_8Uto32:
-		os << "8Uto32";
-		break;
-	case ILGop_8Sto32:
-		os << "8Sto32";
-		break;
-	default:
-		throw "ppIRLoadGOp";
-	}
-
-	return os;
-}
-
 /*
 std::ostream &IR_load_G_xx::pretty_print(std::ostream &os) const {
     os << this->dst << " = if-strict (" << *this->guard << ") " << this->cvt;
@@ -631,11 +456,6 @@ std::ostream &IR_load_G_xx::pretty_print(std::ostream &os) const {
     return os;
 }
 */
-
-std::ostream &operator<<(std::ostream &os, IREndness e) {
-	os << (e == Iend_LE) ? "le" : "be";
-	return os;
-}
 
 /*
 std::ostream &IR_CAS_xx ::pretty_print(std::ostream &os) const {
@@ -656,27 +476,6 @@ std::ostream &IR_CAS_xx ::pretty_print(std::ostream &os) const {
     return os;
 }
 */
-
-std::ostream &operator<<(std::ostream &os, IREffect fx) {
-	switch (fx) {
-	case Ifx_None:
-		os << "noFX";
-		return os;
-	case Ifx_Read:
-		os << "RdFX";
-		return os;
-	case Ifx_Write:
-		os << "WrFX";
-		return os;
-	case Ifx_Modify:
-		os << "MoFX";
-		return os;
-	default:
-		throw "ppIREffect";
-	}
-
-	return os;
-}
 
 /*
 std::ostream &IR_dirty_xx::pretty_print(std::ostream &os) const {
@@ -713,21 +512,6 @@ std::ostream &IR_dirty_xx::pretty_print(std::ostream &os) const {
 }
 */
 
-std::ostream &operator<<(std::ostream &os, IRMBusEvent eve) {
-	switch (eve) {
-	case Imbe_Fence:
-		os << "Fence";
-		break;
-	case Imbe_CancelReservation:
-		os << "CancelReservation";
-		break;
-	default:
-		throw "ppIRMBusEvent";
-	}
-
-	return os;
-}
-
 namespace IR_stmt_types {
 
 std::ostream &no_op::pretty_print(std::ostream &os) const {
@@ -736,7 +520,7 @@ std::ostream &no_op::pretty_print(std::ostream &os) const {
 
 std::ostream &I_mark::pretty_print(std::ostream &os) const {
 	os << "------ IMark(0x" << std::hex << addr << std::dec << ", " << len << ", "
-	   << static_cast<unsigned>(delta) << ")";
+	   << static_cast<unsigned>(delta) << ") ------";
 	return os;
 }
 
@@ -788,7 +572,7 @@ std::ostream &load_G::pretty_print(std::ostream &os) const {
 }
 
 std::ostream &CAS::pretty_print(std::ostream &os) const {
-	if (this->old_hi != IRTemp_INVALID) {
+	if (this->old_hi != IR_temp_xx::invalid) {
 		os << this->old_hi << ",";
 	}
 
@@ -816,11 +600,11 @@ std::ostream &LLSC::pretty_print(std::ostream &os) const {
 }
 
 std::ostream &dirty::pretty_print(std::ostream &os) const {
-	if (tmp != IRTemp_INVALID) {
+	if (tmp != IR_temp_xx::invalid) {
 		os << tmp << " = ";
 	}
 	os << "DIRTY " << *guard;
-	if (m_fx != Ifx_None) {
+	if (m_fx != IR_effect_xx::Ifx_None) {
 		os << m_fx << "-mem(" << *m_addr << "," << m_size << ")";
 	}
 

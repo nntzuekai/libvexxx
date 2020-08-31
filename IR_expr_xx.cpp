@@ -96,7 +96,7 @@ std::unique_ptr<get_R> get_R::from_c(const IRExpr *e) {
 
 	rtv->tag = Iex_Get;
 	rtv->offset = e->Iex.Get.offset;
-	rtv->ty = e->Iex.Get.ty;
+	rtv->ty = IR_type_xx{e->Iex.Get.ty};
 
 	return rtv;
 }
@@ -116,7 +116,7 @@ std::unique_ptr<rd_tmp> rd_tmp::from_c(const IRExpr *e) {
 	auto rtv = std::make_unique<rd_tmp>();
 
 	rtv->tag = Iex_RdTmp;
-	rtv->tmp = e->Iex.RdTmp.tmp;
+	rtv->tmp = IR_temp_xx{e->Iex.RdTmp.tmp};
 
 	return rtv;
 }
@@ -127,7 +127,7 @@ std::unique_ptr<Q_op> Q_op::from_c(const IRExpr *e) {
 	rtv->tag = Iex_Qop;
 
 	auto *qop = e->Iex.Qop.details;
-	rtv->op = qop->op;
+	rtv->op = IR_op_xx{qop->op};
 	rtv->arg1 = IR_expr_xx::from_c(qop->arg1);
 	rtv->arg2 = IR_expr_xx::from_c(qop->arg2);
 	rtv->arg3 = IR_expr_xx::from_c(qop->arg3);
@@ -142,7 +142,7 @@ std::unique_ptr<tri_op> tri_op::from_c(const IRExpr *e) {
 	rtv->tag = Iex_Triop;
 
 	auto *triop = e->Iex.Triop.details;
-	rtv->op = triop->op;
+	rtv->op = IR_op_xx{triop->op};
 	rtv->arg1 = IR_expr_xx::from_c(triop->arg1);
 	rtv->arg2 = IR_expr_xx::from_c(triop->arg2);
 	rtv->arg3 = IR_expr_xx::from_c(triop->arg3);
@@ -156,7 +156,7 @@ std::unique_ptr<bin_op> bin_op::from_c(const IRExpr *e) {
 	rtv->tag = Iex_Binop;
 
 	auto *binop = &(e->Iex.Binop);
-	rtv->op = binop->op;
+	rtv->op = IR_op_xx{binop->op};
 	rtv->arg1 = IR_expr_xx::from_c(binop->arg1);
 	rtv->arg2 = IR_expr_xx::from_c(binop->arg2);
 
@@ -168,7 +168,7 @@ std::unique_ptr<un_op> un_op::from_c(const IRExpr *e) {
 
 	rtv->tag = Iex_Unop;
 
-	rtv->op = e->Iex.Unop.op;
+	rtv->op = IR_op_xx{e->Iex.Unop.op};
 	rtv->arg = IR_expr_xx::from_c(e->Iex.Unop.arg);
 
 	return rtv;
@@ -178,11 +178,11 @@ std::unique_ptr<load> load::from_c(const IRExpr *e) {
 	auto rtv = std::make_unique<load>();
 
 	rtv->tag = Iex_Load;
-	rtv->end = e->Iex.Load.end;
-	rtv->ty = e->Iex.Load.ty;
+	rtv->end = IR_endness_xx{e->Iex.Load.end};
+	rtv->ty = IR_type_xx{e->Iex.Load.ty};
 	rtv->addr = IR_expr_xx::from_c(e->Iex.Load.addr);
 
-	assert(rtv->end == Iend_LE || rtv->end == Iend_BE);
+	assert(rtv->end == IR_endness_xx::Iend_LE || rtv->end == IR_endness_xx::Iend_BE);
 
 	return rtv;
 }
@@ -201,7 +201,7 @@ std::unique_ptr<C_call> C_call::from_c(const IRExpr *e) {
 
 	rtv->tag = Iex_CCall;
 	rtv->cee = IR_callee_xx::from_c(e->Iex.CCall.cee);
-	rtv->ret_ty = e->Iex.CCall.retty;
+	rtv->ret_ty = IR_type_xx{e->Iex.CCall.retty};
 
 	for (auto i = 0; e->Iex.CCall.args[i]; ++i) {
 		rtv->args.push_back(IR_expr_xx::from_c(e->Iex.CCall.args[i]));

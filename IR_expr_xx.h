@@ -1,3 +1,5 @@
+#pragma once
+
 #ifndef INCLUDE_IR_EXPR_XX_H
 #define INCLUDE_IR_EXPR_XX_H
 
@@ -5,12 +7,12 @@ extern "C" {
 #include "pyvex.h"
 // #include "libvex.h"
 }
+#include "IR_enums.h"
+
 #include <memory>
 #include <vector>
 
 namespace libvexxx {
-
-std::ostream &operator<<(std::ostream &os, IROp op);
 
 struct IR_callee_xx {
 	Int regparms;
@@ -67,7 +69,7 @@ std::ostream &operator<<(std::ostream &os, const IR_expr_xx &e);
 
 /*
 struct IR_Q_op_xx{
-    IROp op;
+    IR_op_xx op;
     std::unique_ptr<IR_expr_xx> arg1;
     std::unique_ptr<IR_expr_xx> arg2;
     std::unique_ptr<IR_expr_xx> arg3;
@@ -77,7 +79,7 @@ struct IR_Q_op_xx{
 };
 
 struct IR_tri_op_xx{
-    IROp op;
+    IR_op_xx op;
     std::unique_ptr<IR_expr_xx> arg1;
     std::unique_ptr<IR_expr_xx> arg2;
     std::unique_ptr<IR_expr_xx> arg3;
@@ -97,7 +99,7 @@ struct binder : public IR_expr_xx {
 
 struct get_R : public IR_expr_xx {
 	Int offset;
-	IRType ty;
+	IR_type_xx ty;
 
 	virtual std::ostream &pretty_print(std::ostream &os) const override;
 	static std::unique_ptr<get_R> from_c(const IRExpr *e);
@@ -113,7 +115,7 @@ struct get_I : public IR_expr_xx {
 };
 
 struct rd_tmp : public IR_expr_xx {
-	IRTemp tmp;
+	IR_temp_xx tmp;
 
 	virtual std::ostream &pretty_print(std::ostream &os) const override;
 	static std::unique_ptr<rd_tmp> from_c(const IRExpr *e);
@@ -121,7 +123,7 @@ struct rd_tmp : public IR_expr_xx {
 
 struct Q_op : public IR_expr_xx {
 	// std::unique_ptr<IR_Q_op_xx> details;
-	IROp op;
+	IR_op_xx op;
 	std::unique_ptr<IR_expr_xx> arg1;
 	std::unique_ptr<IR_expr_xx> arg2;
 	std::unique_ptr<IR_expr_xx> arg3;
@@ -133,7 +135,7 @@ struct Q_op : public IR_expr_xx {
 
 struct tri_op : public IR_expr_xx {
 	// std::unique_ptr<IR_tri_op_xx> details;
-	IROp op;
+	IR_op_xx op;
 	std::unique_ptr<IR_expr_xx> arg1;
 	std::unique_ptr<IR_expr_xx> arg2;
 	std::unique_ptr<IR_expr_xx> arg3;
@@ -143,7 +145,7 @@ struct tri_op : public IR_expr_xx {
 };
 
 struct bin_op : public IR_expr_xx {
-	IROp op;
+	IR_op_xx op;
 	std::unique_ptr<IR_expr_xx> arg1;
 	std::unique_ptr<IR_expr_xx> arg2;
 
@@ -152,7 +154,7 @@ struct bin_op : public IR_expr_xx {
 };
 
 struct un_op : public IR_expr_xx {
-	IROp op;
+	IR_op_xx op;
 	std::unique_ptr<IR_expr_xx> arg;
 
 	virtual std::ostream &pretty_print(std::ostream &os) const override;
@@ -160,8 +162,8 @@ struct un_op : public IR_expr_xx {
 };
 
 struct load : public IR_expr_xx {
-	IREndness end;
-	IRType ty;
+	IR_endness_xx end;
+	IR_type_xx ty;
 	std::unique_ptr<IR_expr_xx> addr;
 
 	virtual std::ostream &pretty_print(std::ostream &os) const override;
@@ -177,7 +179,7 @@ struct constant : public IR_expr_xx {
 
 struct C_call : public IR_expr_xx {
 	std::unique_ptr<IR_callee_xx> cee;
-	IRType ret_ty;
+	IR_type_xx ret_ty;
 	std::vector<std::unique_ptr<IR_expr_xx>> args;
 
 	virtual std::ostream &pretty_print(std::ostream &os) const override;
