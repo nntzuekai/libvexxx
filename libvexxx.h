@@ -273,7 +273,7 @@ struct IRSB_xx {
 	std::vector<std::unique_ptr<IR_stmt_xx>> stmts;
 	std::unique_ptr<IR_expr_xx> next;
 	IR_jump_kind_xx jumpkind;
-	Int offsIP;
+	Int offs_IP;
 
 	static std::unique_ptr<IRSB_xx> from_c(const IRSB *bb);
 	friend std::ostream &operator<<(std::ostream &os, const IRSB_xx &irsb);

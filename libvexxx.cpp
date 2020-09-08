@@ -18,7 +18,7 @@ std::unique_ptr<IRSB_xx> IRSB_xx::from_c(const IRSB *bb) {
 	auto rtv = std::make_unique<IRSB_xx>();
 	rtv->tyenv = IR_type_env_xx::from_c(bb->tyenv);
 	rtv->jumpkind = IR_jump_kind_xx{bb->jumpkind};
-	rtv->offsIP = bb->offsIP;
+	rtv->offs_IP = bb->offsIP;
 	rtv->next = IR_expr_xx::from_c(bb->next);
 
 	rtv->stmts.reserve(bb->stmts_used);
@@ -398,7 +398,17 @@ std::ostream &IRSB_xx::pretty_print(std::ostream &os, arch_type arch) const {
 		s->pretty_print(os);
 		os << "\n";
 	}
-	os << "\tPUT(" << this->offsIP << ") = ";
+	os << "\tPUT(";
+
+	auto *name=guest_register_name(offs_IP,arch);
+	if(name){
+		os<<"%"<<name;
+	}
+	else{
+		os<<offs_IP;
+	}
+	
+	os<< ") = ";
 	next->pretty_print(os, arch);
 	os << "; exit-" << this->jumpkind;
 	os << "\n}\n";
@@ -681,7 +691,17 @@ std::ostream &MBE::pretty_print(std::ostream &os, arch_type) const {
 std::ostream &exit::pretty_print(std::ostream &os, arch_type arch) const {
 	os << "if (";
 	guard->pretty_print(os, arch);
-	os << ") { PUT(" << offs_IP << ") = ";
+	os << ") { PUT(";
+
+	auto *name=guest_register_name(offs_IP,arch);
+	if(name){
+		os<<"%"<<name;
+	}
+	else{
+		os<<offs_IP;
+	}
+	
+	os<< ") = ";
 	dst->pretty_print(os);
 	os << "; exit-" << jk << " } ";
 

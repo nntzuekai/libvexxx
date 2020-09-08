@@ -340,7 +340,7 @@ std::ostream &get_R::pretty_print(std::ostream &os, arch_type arch) const {
 	if (name) {
 		os << name;
 	} else {
-		os << offset;
+		os << "%" << offset;
 	}
 
 	os << ")";
@@ -362,46 +362,46 @@ std::ostream &rd_tmp::pretty_print(std::ostream &os, arch_type) const {
 std::ostream &Q_op::pretty_print(std::ostream &os, arch_type arch) const {
 	os << op << "(";
 	arg1->pretty_print(os, arch);
-	os<< ",";
+	os << ",";
 	arg2->pretty_print(os, arch);
-	os<< ",";
+	os << ",";
 	arg3->pretty_print(os, arch);
-	os<< ",";
+	os << ",";
 	arg4->pretty_print(os, arch);
-	os<< ")";
+	os << ")";
 	return os;
 }
 
 std::ostream &tri_op::pretty_print(std::ostream &os, arch_type arch) const {
 	os << op << "(";
 	arg1->pretty_print(os, arch);
-	os<< ",";
+	os << ",";
 	arg2->pretty_print(os, arch);
-	os<< ",";
+	os << ",";
 	arg3->pretty_print(os, arch);
-	os<< ")";
+	os << ")";
 	return os;
 }
 
 std::ostream &bin_op::pretty_print(std::ostream &os, arch_type arch) const {
 	os << op << "(";
 	arg1->pretty_print(os, arch);
-	os<< ",";
+	os << ",";
 	arg2->pretty_print(os, arch);
-	os<< ")";
+	os << ")";
 	return os;
 }
 
 std::ostream &un_op::pretty_print(std::ostream &os, arch_type arch) const {
 	os << op << "(";
 	arg->pretty_print(os, arch);
-	os<< ")";
+	os << ")";
 	return os;
 }
 
 std::ostream &load::pretty_print(std::ostream &os, arch_type arch) const {
 	os << "LD" << end << ":" << ty << "(";
-	addr->pretty_print(os,arch);
+	addr->pretty_print(os, arch);
 	os << ")";
 	return os;
 }
@@ -414,7 +414,7 @@ std::ostream &constant::pretty_print(std::ostream &os, arch_type) const {
 std::ostream &C_call::pretty_print(std::ostream &os, arch_type arch) const {
 	os << *cee << "(";
 	for (auto &&arg : args) {
-		arg->pretty_print(os,arch);
+		arg->pretty_print(os, arch);
 		os << ",";
 	}
 	os << "):" << ret_ty;
@@ -423,11 +423,11 @@ std::ostream &C_call::pretty_print(std::ostream &os, arch_type arch) const {
 
 std::ostream &ITE::pretty_print(std::ostream &os, arch_type arch) const {
 	os << "ITE(";
-	cond->pretty_print(os,arch);
+	cond->pretty_print(os, arch);
 	os << ",";
-	if_true->pretty_print(os,arch);
+	if_true->pretty_print(os, arch);
 	os << ",";
-	if_false->pretty_print(os,arch);
+	if_false->pretty_print(os, arch);
 	os << ")";
 	return os;
 }
