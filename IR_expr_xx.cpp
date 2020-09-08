@@ -338,9 +338,9 @@ std::ostream &get_R::pretty_print(std::ostream &os, arch_type arch) const {
 
 	auto *name = guest_register_name(offset, arch);
 	if (name) {
-		os << name;
+		os << "%"<< name;
 	} else {
-		os << "%" << offset;
+		os  << offset;
 	}
 
 	os << ")";
