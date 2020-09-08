@@ -33,6 +33,7 @@ enum struct arch_type {
 	mips32,
 	mips64,
 	tilegx,
+	others,
 };
 
 const char *guest_register_name(Int offset, arch_type arch = arch_type::amd64);
