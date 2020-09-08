@@ -182,7 +182,8 @@ std::unique_ptr<load> load::from_c(const IRExpr *e) {
 	rtv->ty = IR_type_xx{e->Iex.Load.ty};
 	rtv->addr = IR_expr_xx::from_c(e->Iex.Load.addr);
 
-	assert(rtv->end == IR_endness_xx::Iend_LE || rtv->end == IR_endness_xx::Iend_BE);
+	assert(rtv->end == IR_endness_xx::Iend_LE ||
+	       rtv->end == IR_endness_xx::Iend_BE);
 
 	return rtv;
 }
@@ -239,9 +240,11 @@ std::unique_ptr<GSPTR> GSPTR::from_c(const IRExpr *e) {
 
 } // namespace ir_expr_types
 
+/*
 std::ostream &operator<<(std::ostream &os, const IR_expr_xx &e) {
-	return e.pretty_print(os);
+    return e.pretty_print(os);
 }
+*/
 
 std::ostream &IR_callee_xx::pretty_print(std::ostream &os) const {
 	os << name;
@@ -257,20 +260,19 @@ std::ostream &IR_callee_xx::pretty_print(std::ostream &os) const {
 	return os;
 }
 
-std::ostream &operator<<(std::ostream &os, const IR_callee_xx &cee){
+std::ostream &operator<<(std::ostream &os, const IR_callee_xx &cee) {
 	cee.pretty_print(os);
 
 	return os;
 }
 
-
-std::ostream &operator<<(std::ostream &os, const IRRegArray &arr){
-	os<<"("<<arr.base<<":"<<arr.nElems<<"x"<<arr.elemTy<<")";
+std::ostream &operator<<(std::ostream &os, const IRRegArray &arr) {
+	os << "(" << arr.base << ":" << arr.nElems << "x" << arr.elemTy << ")";
 
 	return os;
 }
 
-std::ostream& operator<<(std::ostream &os, const IR_const_xx &e){
+std::ostream &operator<<(std::ostream &os, const IR_const_xx &e) {
 	e.pretty_print(os);
 
 	return os;
@@ -326,77 +328,117 @@ std::ostream &IR_const_xx::pretty_print(std::ostream &os) const {
 
 namespace ir_expr_types {
 
-std::ostream &binder::pretty_print(std::ostream &os) const {
-	os<<"BIND-"<<bd;
+std::ostream &binder::pretty_print(std::ostream &os, arch_type) const {
+	os << "BIND-" << bd;
 	return os;
 }
 
-std::ostream &get_R::pretty_print(std::ostream &os) const {
-	os<<"GET:"<<ty<<"("<<offset<<")";
-	return os;
-}
+std::ostream &get_R::pretty_print(std::ostream &os, arch_type arch) const {
+	os << "GET:" << ty << "(";
 
-std::ostream &get_I::pretty_print(std::ostream &os) const {
-	os<<"GETI"<<descr<<"["<<*ix<<","<<bias<<"]";
-	return os;
-}
-
-std::ostream &rd_tmp::pretty_print(std::ostream &os) const {
-	os<<tmp;
-	return os;
-}
-
-std::ostream &Q_op::pretty_print(std::ostream &os) const {
-	os<<op<<"("<<*arg1<<","<<*arg2<<","<<*arg3<<","<<*arg4<<")";
-	return os;
-}
-
-std::ostream &tri_op::pretty_print(std::ostream &os) const {
-	os<<op<<"("<<*arg1<<","<<*arg2<<","<<*arg3<<")";
-	return os;
-}
-
-std::ostream &bin_op::pretty_print(std::ostream &os) const {
-	os<<op<<"("<<*arg1<<","<<*arg2<<")";
-	return os;
-}
-
-std::ostream &un_op::pretty_print(std::ostream &os) const {
-	os<<op<<"("<<*arg<<")";
-	return os;
-}
-
-std::ostream &load::pretty_print(std::ostream &os) const {
-	os<<"LD"<<end<<":"<<ty<<"("<<*addr<<")";
-	return os;
-}
-
-std::ostream &constant::pretty_print(std::ostream &os) const {
-	os<<*con;
-	return os;
-}
-
-std::ostream &C_call::pretty_print(std::ostream &os) const {
-	os<<*cee<<"(";
-	for(auto &&arg:args){
-		os<<*arg<<",";
+	auto *name = guest_register_name(offset, arch);
+	if (name) {
+		os << name;
+	} else {
+		os << offset;
 	}
-	os<<"):"<<ret_ty;
+
+	os << ")";
 	return os;
 }
 
-std::ostream &ITE::pretty_print(std::ostream &os) const {
-	os<<"ITE("<<*cond<<","<<*if_true<<","<<*if_false<<")";
+std::ostream &get_I::pretty_print(std::ostream &os, arch_type arch) const {
+	os << "GETI" << descr << "[";
+	ix->pretty_print(os, arch);
+	os << "," << bias << "]";
 	return os;
 }
 
-std::ostream &VECRET::pretty_print(std::ostream &os) const {
-	os<<"VECRET";
+std::ostream &rd_tmp::pretty_print(std::ostream &os, arch_type) const {
+	os << tmp;
 	return os;
 }
 
-std::ostream &GSPTR::pretty_print(std::ostream &os) const {
-	os<<"GSPTR";
+std::ostream &Q_op::pretty_print(std::ostream &os, arch_type arch) const {
+	os << op << "(";
+	arg1->pretty_print(os, arch);
+	os<< ",";
+	arg2->pretty_print(os, arch);
+	os<< ",";
+	arg3->pretty_print(os, arch);
+	os<< ",";
+	arg4->pretty_print(os, arch);
+	os<< ")";
+	return os;
+}
+
+std::ostream &tri_op::pretty_print(std::ostream &os, arch_type arch) const {
+	os << op << "(";
+	arg1->pretty_print(os, arch);
+	os<< ",";
+	arg2->pretty_print(os, arch);
+	os<< ",";
+	arg3->pretty_print(os, arch);
+	os<< ")";
+	return os;
+}
+
+std::ostream &bin_op::pretty_print(std::ostream &os, arch_type arch) const {
+	os << op << "(";
+	arg1->pretty_print(os, arch);
+	os<< ",";
+	arg2->pretty_print(os, arch);
+	os<< ")";
+	return os;
+}
+
+std::ostream &un_op::pretty_print(std::ostream &os, arch_type arch) const {
+	os << op << "(";
+	arg->pretty_print(os, arch);
+	os<< ")";
+	return os;
+}
+
+std::ostream &load::pretty_print(std::ostream &os, arch_type arch) const {
+	os << "LD" << end << ":" << ty << "(";
+	addr->pretty_print(os,arch);
+	os << ")";
+	return os;
+}
+
+std::ostream &constant::pretty_print(std::ostream &os, arch_type) const {
+	os << *con;
+	return os;
+}
+
+std::ostream &C_call::pretty_print(std::ostream &os, arch_type arch) const {
+	os << *cee << "(";
+	for (auto &&arg : args) {
+		arg->pretty_print(os,arch);
+		os << ",";
+	}
+	os << "):" << ret_ty;
+	return os;
+}
+
+std::ostream &ITE::pretty_print(std::ostream &os, arch_type arch) const {
+	os << "ITE(";
+	cond->pretty_print(os,arch);
+	os << ",";
+	if_true->pretty_print(os,arch);
+	os << ",";
+	if_false->pretty_print(os,arch);
+	os << ")";
+	return os;
+}
+
+std::ostream &VECRET::pretty_print(std::ostream &os, arch_type) const {
+	os << "VECRET";
+	return os;
+}
+
+std::ostream &GSPTR::pretty_print(std::ostream &os, arch_type) const {
+	os << "GSPTR";
 	return os;
 }
 

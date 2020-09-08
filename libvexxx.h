@@ -9,6 +9,7 @@ extern "C" {
 }
 #include "IR_enums.h"
 #include "IR_expr_xx.h"
+#include "guest_register_list.h"
 
 #include <cassert>
 #include <cstring>
@@ -104,7 +105,7 @@ struct IR_dirty_xx {
 struct IR_stmt_xx {
 	IRStmtTag tag;
 
-	virtual std::ostream &pretty_print(std::ostream &os) const = 0;
+	virtual std::ostream &pretty_print(std::ostream &os, arch_type arch=arch_type::amd64) const = 0;
 	static std::unique_ptr<IR_stmt_xx> from_c(const IRStmt *s);
 };
 std::ostream &operator<<(std::ostream &os, const IR_stmt_xx &stmt);
@@ -112,7 +113,7 @@ std::ostream &operator<<(std::ostream &os, const IR_stmt_xx &stmt);
 namespace IR_stmt_types {
 struct no_op : public IR_stmt_xx {
 
-	std::ostream &pretty_print(std::ostream &os) const override;
+	std::ostream &pretty_print(std::ostream &os, arch_type arch=arch_type::amd64) const override;
 	static std::unique_ptr<no_op> from_c(const IRStmt *s);
 };
 
@@ -121,7 +122,7 @@ struct I_mark : public IR_stmt_xx {
 	UInt len;
 	UChar delta;
 
-	std::ostream &pretty_print(std::ostream &os) const override;
+	std::ostream &pretty_print(std::ostream &os, arch_type arch=arch_type::amd64) const override;
 	static std::unique_ptr<I_mark> from_c(const IRStmt *s);
 };
 
@@ -130,7 +131,7 @@ struct ABI_hint : public IR_stmt_xx {
 	Int len;
 	std::unique_ptr<IR_expr_xx> nia;
 
-	std::ostream &pretty_print(std::ostream &os) const override;
+	std::ostream &pretty_print(std::ostream &os, arch_type arch=arch_type::amd64) const override;
 	static std::unique_ptr<ABI_hint> from_c(const IRStmt *s);
 };
 
@@ -138,7 +139,7 @@ struct put : public IR_stmt_xx {
 	Int offset;
 	std::unique_ptr<IR_expr_xx> data;
 
-	std::ostream &pretty_print(std::ostream &os) const override;
+	std::ostream &pretty_print(std::ostream &os, arch_type arch=arch_type::amd64) const override;
 	static std::unique_ptr<put> from_c(const IRStmt *s);
 };
 
@@ -148,7 +149,7 @@ struct put_I : public IR_stmt_xx {
 	Int bias;
 	std::unique_ptr<IR_expr_xx> data;
 
-	std::ostream &pretty_print(std::ostream &os) const override;
+	std::ostream &pretty_print(std::ostream &os, arch_type arch=arch_type::amd64) const override;
 	static std::unique_ptr<put_I> from_c(const IRStmt *s);
 };
 
@@ -156,7 +157,7 @@ struct wr_tmp : public IR_stmt_xx {
 	IR_temp_xx tmp;
 	std::unique_ptr<IR_expr_xx> data;
 
-	std::ostream &pretty_print(std::ostream &os) const override;
+	std::ostream &pretty_print(std::ostream &os, arch_type arch=arch_type::amd64) const override;
 	static std::unique_ptr<wr_tmp> from_c(const IRStmt *s);
 };
 
@@ -165,7 +166,7 @@ struct store : public IR_stmt_xx {
 	std::unique_ptr<IR_expr_xx> addr;
 	std::unique_ptr<IR_expr_xx> data;
 
-	std::ostream &pretty_print(std::ostream &os) const override;
+	std::ostream &pretty_print(std::ostream &os, arch_type arch=arch_type::amd64) const override;
 	static std::unique_ptr<store> from_c(const IRStmt *s);
 };
 
@@ -175,7 +176,7 @@ struct store_G : public IR_stmt_xx {
 	std::unique_ptr<IR_expr_xx> data;
 	std::unique_ptr<IR_expr_xx> guard;
 
-	std::ostream &pretty_print(std::ostream &os) const override;
+	std::ostream &pretty_print(std::ostream &os, arch_type arch=arch_type::amd64) const override;
 	static std::unique_ptr<store_G> from_c(const IRStmt *s);
 };
 
@@ -188,7 +189,7 @@ struct load_G : public IR_stmt_xx {
 	std::unique_ptr<IR_expr_xx> guard;
 	// std::unique_ptr<IR_load_G_xx> details;
 
-	std::ostream &pretty_print(std::ostream &os) const override;
+	std::ostream &pretty_print(std::ostream &os, arch_type arch=arch_type::amd64) const override;
 	static std::unique_ptr<load_G> from_c(const IRStmt *s);
 };
 
@@ -204,7 +205,7 @@ struct CAS : public IR_stmt_xx {
 
 	// std::unique_ptr<IR_CAS_xx> details;
 
-	std::ostream &pretty_print(std::ostream &os) const override;
+	std::ostream &pretty_print(std::ostream &os, arch_type arch=arch_type::amd64) const override;
 	static std::unique_ptr<CAS> from_c(const IRStmt *s);
 };
 
@@ -214,7 +215,7 @@ struct LLSC : public IR_stmt_xx {
 	std::unique_ptr<IR_expr_xx> addr;
 	std::unique_ptr<IR_expr_xx> store_data;
 
-	std::ostream &pretty_print(std::ostream &os) const override;
+	std::ostream &pretty_print(std::ostream &os, arch_type arch=arch_type::amd64) const override;
 	static std::unique_ptr<LLSC> from_c(const IRStmt *s);
 };
 
@@ -243,14 +244,14 @@ struct dirty : public IR_stmt_xx {
 
 	// std::unique_ptr<IR_dirty_xx> details;
 
-	std::ostream &pretty_print(std::ostream &os) const override;
+	std::ostream &pretty_print(std::ostream &os, arch_type arch=arch_type::amd64) const override;
 	static std::unique_ptr<dirty> from_c(const IRStmt *s);
 };
 
 struct MBE : public IR_stmt_xx {
 	IR_MBUS_event_xx event;
 
-	std::ostream &pretty_print(std::ostream &os) const override;
+	std::ostream &pretty_print(std::ostream &os, arch_type arch=arch_type::amd64) const override;
 	static std::unique_ptr<MBE> from_c(const IRStmt *s);
 };
 
@@ -260,7 +261,7 @@ struct exit : public IR_stmt_xx {
 	IR_jump_kind_xx jk;
 	Int offs_IP;
 
-	std::ostream &pretty_print(std::ostream &os) const override;
+	std::ostream &pretty_print(std::ostream &os, arch_type arch=arch_type::amd64) const override;
 	static std::unique_ptr<exit> from_c(const IRStmt *s);
 };
 
@@ -276,7 +277,7 @@ struct IRSB_xx {
 
 	static std::unique_ptr<IRSB_xx> from_c(const IRSB *bb);
 	friend std::ostream &operator<<(std::ostream &os, const IRSB_xx &irsb);
-	std::ostream &pretty_print(std::ostream &os) const;
+	std::ostream &pretty_print(std::ostream &os, arch_type arch=arch_type::amd64) const;
 };
 
 std::ostream &operator<<(std::ostream &os, const IRSB_xx &irsb);
