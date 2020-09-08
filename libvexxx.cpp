@@ -548,7 +548,7 @@ std::ostream &put::pretty_print(std::ostream &os, arch_type arch) const {
 	os << "PUT(";
 	auto name = guest_register_name(offset, arch);
 	if (name) {
-		os << name;
+		os <<"%"<< name;
 	} else {
 		os << offset;
 	}
