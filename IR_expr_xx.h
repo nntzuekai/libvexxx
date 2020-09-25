@@ -59,7 +59,9 @@ void copy_IRRegArray(IRRegArray *dst, const IRRegArray *src);
 std::ostream &operator<<(std::ostream &os, const IRRegArray &arr);
 
 struct IR_expr_xx {
+#ifdef LIBVEXXX_TAGGED
 	IRExprTag tag;
+#endif
 
 	virtual std::ostream &pretty_print(std::ostream &os, arch_type arch=arch_type::amd64) const = 0;
 
@@ -68,6 +70,7 @@ struct IR_expr_xx {
 	*/
 
 	static std::unique_ptr<IR_expr_xx> from_c(const IRExpr *e);
+	virtual IRExprTag type_tag() const=0;
 };
 
 /*
@@ -102,6 +105,7 @@ struct binder : public IR_expr_xx {
 
 	virtual std::ostream &pretty_print(std::ostream &os, arch_type arch=arch_type::amd64) const override;
 	static std::unique_ptr<binder> from_c(const IRExpr *e);
+	virtual IRExprTag type_tag() const override;
 };
 
 struct get_R : public IR_expr_xx {
@@ -110,6 +114,7 @@ struct get_R : public IR_expr_xx {
 
 	virtual std::ostream &pretty_print(std::ostream &os, arch_type arch=arch_type::amd64) const override;
 	static std::unique_ptr<get_R> from_c(const IRExpr *e);
+	virtual IRExprTag type_tag() const override;
 };
 
 struct get_I : public IR_expr_xx {
@@ -119,6 +124,7 @@ struct get_I : public IR_expr_xx {
 
 	virtual std::ostream &pretty_print(std::ostream &os, arch_type arch=arch_type::amd64) const override;
 	static std::unique_ptr<get_I> from_c(const IRExpr *e);
+	virtual IRExprTag type_tag() const override;
 };
 
 struct rd_tmp : public IR_expr_xx {
@@ -126,6 +132,7 @@ struct rd_tmp : public IR_expr_xx {
 
 	virtual std::ostream &pretty_print(std::ostream &os, arch_type arch=arch_type::amd64) const override;
 	static std::unique_ptr<rd_tmp> from_c(const IRExpr *e);
+	virtual IRExprTag type_tag() const override;
 };
 
 struct Q_op : public IR_expr_xx {
@@ -138,6 +145,7 @@ struct Q_op : public IR_expr_xx {
 
 	virtual std::ostream &pretty_print(std::ostream &os, arch_type arch=arch_type::amd64) const override;
 	static std::unique_ptr<Q_op> from_c(const IRExpr *e);
+	virtual IRExprTag type_tag() const override;
 };
 
 struct tri_op : public IR_expr_xx {
@@ -149,6 +157,7 @@ struct tri_op : public IR_expr_xx {
 
 	virtual std::ostream &pretty_print(std::ostream &os, arch_type arch=arch_type::amd64) const override;
 	static std::unique_ptr<tri_op> from_c(const IRExpr *e);
+	virtual IRExprTag type_tag() const override;
 };
 
 struct bin_op : public IR_expr_xx {
@@ -158,6 +167,7 @@ struct bin_op : public IR_expr_xx {
 
 	virtual std::ostream &pretty_print(std::ostream &os, arch_type arch=arch_type::amd64) const override;
 	static std::unique_ptr<bin_op> from_c(const IRExpr *e);
+	virtual IRExprTag type_tag() const override;
 };
 
 struct un_op : public IR_expr_xx {
@@ -166,6 +176,7 @@ struct un_op : public IR_expr_xx {
 
 	virtual std::ostream &pretty_print(std::ostream &os, arch_type arch=arch_type::amd64) const override;
 	static std::unique_ptr<un_op> from_c(const IRExpr *e);
+	virtual IRExprTag type_tag() const override;
 };
 
 struct load : public IR_expr_xx {
@@ -175,6 +186,7 @@ struct load : public IR_expr_xx {
 
 	virtual std::ostream &pretty_print(std::ostream &os, arch_type arch=arch_type::amd64) const override;
 	static std::unique_ptr<load> from_c(const IRExpr *e);
+	virtual IRExprTag type_tag() const override;
 };
 
 struct constant : public IR_expr_xx {
@@ -182,6 +194,7 @@ struct constant : public IR_expr_xx {
 
 	virtual std::ostream &pretty_print(std::ostream &os, arch_type arch=arch_type::amd64) const override;
 	static std::unique_ptr<constant> from_c(const IRExpr *e);
+	virtual IRExprTag type_tag() const override;
 };
 
 struct C_call : public IR_expr_xx {
@@ -191,6 +204,7 @@ struct C_call : public IR_expr_xx {
 
 	virtual std::ostream &pretty_print(std::ostream &os, arch_type arch=arch_type::amd64) const override;
 	static std::unique_ptr<C_call> from_c(const IRExpr *e);
+	virtual IRExprTag type_tag() const override;
 };
 
 struct ITE : public IR_expr_xx {
@@ -200,16 +214,19 @@ struct ITE : public IR_expr_xx {
 
 	virtual std::ostream &pretty_print(std::ostream &os, arch_type arch=arch_type::amd64) const override;
 	static std::unique_ptr<ITE> from_c(const IRExpr *e);
+	virtual IRExprTag type_tag() const override;
 };
 
 struct VECRET : public IR_expr_xx {
 	virtual std::ostream &pretty_print(std::ostream &os, arch_type arch=arch_type::amd64) const override;
 	static std::unique_ptr<VECRET> from_c(const IRExpr *e);
+	virtual IRExprTag type_tag() const override;
 };
 
 struct GSPTR : public IR_expr_xx {
 	virtual std::ostream &pretty_print(std::ostream &os, arch_type arch=arch_type::amd64) const override;
 	static std::unique_ptr<GSPTR> from_c(const IRExpr *e);
+	virtual IRExprTag type_tag() const override;
 };
 
 } // namespace ir_expr_types

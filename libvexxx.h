@@ -103,10 +103,13 @@ struct IR_dirty_xx {
 */
 
 struct IR_stmt_xx {
+#ifdef LIBVEXXX_TAGGED
 	IRStmtTag tag;
+#endif
 
 	virtual std::ostream &pretty_print(std::ostream &os, arch_type arch=arch_type::amd64) const = 0;
 	static std::unique_ptr<IR_stmt_xx> from_c(const IRStmt *s);
+	virtual IRStmtTag type_tag() const=0;
 };
 std::ostream &operator<<(std::ostream &os, const IR_stmt_xx &stmt);
 
@@ -115,6 +118,7 @@ struct no_op : public IR_stmt_xx {
 
 	std::ostream &pretty_print(std::ostream &os, arch_type arch=arch_type::amd64) const override;
 	static std::unique_ptr<no_op> from_c(const IRStmt *s);
+	virtual IRStmtTag type_tag() const override;
 };
 
 struct I_mark : public IR_stmt_xx {
@@ -124,6 +128,7 @@ struct I_mark : public IR_stmt_xx {
 
 	std::ostream &pretty_print(std::ostream &os, arch_type arch=arch_type::amd64) const override;
 	static std::unique_ptr<I_mark> from_c(const IRStmt *s);
+	virtual IRStmtTag type_tag() const override;
 };
 
 struct ABI_hint : public IR_stmt_xx {
@@ -133,6 +138,7 @@ struct ABI_hint : public IR_stmt_xx {
 
 	std::ostream &pretty_print(std::ostream &os, arch_type arch=arch_type::amd64) const override;
 	static std::unique_ptr<ABI_hint> from_c(const IRStmt *s);
+	virtual IRStmtTag type_tag() const override;
 };
 
 struct put : public IR_stmt_xx {
@@ -141,6 +147,7 @@ struct put : public IR_stmt_xx {
 
 	std::ostream &pretty_print(std::ostream &os, arch_type arch=arch_type::amd64) const override;
 	static std::unique_ptr<put> from_c(const IRStmt *s);
+	virtual IRStmtTag type_tag() const override;
 };
 
 struct put_I : public IR_stmt_xx {
@@ -151,6 +158,7 @@ struct put_I : public IR_stmt_xx {
 
 	std::ostream &pretty_print(std::ostream &os, arch_type arch=arch_type::amd64) const override;
 	static std::unique_ptr<put_I> from_c(const IRStmt *s);
+	virtual IRStmtTag type_tag() const override;
 };
 
 struct wr_tmp : public IR_stmt_xx {
@@ -159,6 +167,7 @@ struct wr_tmp : public IR_stmt_xx {
 
 	std::ostream &pretty_print(std::ostream &os, arch_type arch=arch_type::amd64) const override;
 	static std::unique_ptr<wr_tmp> from_c(const IRStmt *s);
+	virtual IRStmtTag type_tag() const override;
 };
 
 struct store : public IR_stmt_xx {
@@ -168,6 +177,7 @@ struct store : public IR_stmt_xx {
 
 	std::ostream &pretty_print(std::ostream &os, arch_type arch=arch_type::amd64) const override;
 	static std::unique_ptr<store> from_c(const IRStmt *s);
+	virtual IRStmtTag type_tag() const override;
 };
 
 struct store_G : public IR_stmt_xx {
@@ -178,6 +188,7 @@ struct store_G : public IR_stmt_xx {
 
 	std::ostream &pretty_print(std::ostream &os, arch_type arch=arch_type::amd64) const override;
 	static std::unique_ptr<store_G> from_c(const IRStmt *s);
+	virtual IRStmtTag type_tag() const override;
 };
 
 struct load_G : public IR_stmt_xx {
@@ -191,6 +202,7 @@ struct load_G : public IR_stmt_xx {
 
 	std::ostream &pretty_print(std::ostream &os, arch_type arch=arch_type::amd64) const override;
 	static std::unique_ptr<load_G> from_c(const IRStmt *s);
+	virtual IRStmtTag type_tag() const override;
 };
 
 struct CAS : public IR_stmt_xx {
@@ -207,6 +219,7 @@ struct CAS : public IR_stmt_xx {
 
 	std::ostream &pretty_print(std::ostream &os, arch_type arch=arch_type::amd64) const override;
 	static std::unique_ptr<CAS> from_c(const IRStmt *s);
+	virtual IRStmtTag type_tag() const override;
 };
 
 struct LLSC : public IR_stmt_xx {
@@ -217,6 +230,7 @@ struct LLSC : public IR_stmt_xx {
 
 	std::ostream &pretty_print(std::ostream &os, arch_type arch=arch_type::amd64) const override;
 	static std::unique_ptr<LLSC> from_c(const IRStmt *s);
+	virtual IRStmtTag type_tag() const override;
 };
 
 struct dirty : public IR_stmt_xx {
@@ -246,6 +260,7 @@ struct dirty : public IR_stmt_xx {
 
 	std::ostream &pretty_print(std::ostream &os, arch_type arch=arch_type::amd64) const override;
 	static std::unique_ptr<dirty> from_c(const IRStmt *s);
+	virtual IRStmtTag type_tag() const override;
 };
 
 struct MBE : public IR_stmt_xx {
@@ -253,6 +268,7 @@ struct MBE : public IR_stmt_xx {
 
 	std::ostream &pretty_print(std::ostream &os, arch_type arch=arch_type::amd64) const override;
 	static std::unique_ptr<MBE> from_c(const IRStmt *s);
+	virtual IRStmtTag type_tag() const override;
 };
 
 struct exit : public IR_stmt_xx {
@@ -263,6 +279,7 @@ struct exit : public IR_stmt_xx {
 
 	std::ostream &pretty_print(std::ostream &os, arch_type arch=arch_type::amd64) const override;
 	static std::unique_ptr<exit> from_c(const IRStmt *s);
+	virtual IRStmtTag type_tag() const override;
 };
 
 } // namespace IR_stmt_types

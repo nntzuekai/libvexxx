@@ -85,26 +85,36 @@ namespace ir_expr_types {
 std::unique_ptr<binder> binder::from_c(const IRExpr *e) {
 	auto rtv = std::make_unique<binder>();
 
+#ifdef LIBVEXXX_TAGGED
 	rtv->tag = Iex_Binder;
+#endif
 	rtv->bd = e->Iex.Binder.binder;
 
 	return rtv;
 }
 
+IRExprTag binder::type_tag() const { return Iex_Binder; }
+
 std::unique_ptr<get_R> get_R::from_c(const IRExpr *e) {
 	auto rtv = std::make_unique<get_R>();
 
+#ifdef LIBVEXXX_TAGGED
 	rtv->tag = Iex_Get;
+#endif
 	rtv->offset = e->Iex.Get.offset;
 	rtv->ty = IR_type_xx{e->Iex.Get.ty};
 
 	return rtv;
 }
 
+IRExprTag get_R::type_tag() const { return Iex_Get; }
+
 std::unique_ptr<get_I> get_I::from_c(const IRExpr *e) {
 	auto rtv = std::make_unique<get_I>();
 
+#ifdef LIBVEXXX_TAGGED
 	rtv->tag = Iex_GetI;
+#endif
 	copy_IRRegArray(&(rtv->descr), e->Iex.GetI.descr);
 	rtv->ix = IR_expr_xx::from_c(e->Iex.GetI.ix);
 	rtv->bias = e->Iex.GetI.bias;
@@ -112,19 +122,27 @@ std::unique_ptr<get_I> get_I::from_c(const IRExpr *e) {
 	return rtv;
 }
 
+IRExprTag get_I::type_tag() const { return Iex_GetI; }
+
 std::unique_ptr<rd_tmp> rd_tmp::from_c(const IRExpr *e) {
 	auto rtv = std::make_unique<rd_tmp>();
 
+#ifdef LIBVEXXX_TAGGED
 	rtv->tag = Iex_RdTmp;
+#endif
 	rtv->tmp = IR_temp_xx{e->Iex.RdTmp.tmp};
 
 	return rtv;
 }
 
+IRExprTag rd_tmp::type_tag() const { return Iex_RdTmp; }
+
 std::unique_ptr<Q_op> Q_op::from_c(const IRExpr *e) {
 	auto rtv = std::make_unique<Q_op>();
 
+#ifdef LIBVEXXX_TAGGED
 	rtv->tag = Iex_Qop;
+#endif
 
 	auto *qop = e->Iex.Qop.details;
 	rtv->op = IR_op_xx{qop->op};
@@ -136,10 +154,14 @@ std::unique_ptr<Q_op> Q_op::from_c(const IRExpr *e) {
 	return rtv;
 }
 
+IRExprTag Q_op::type_tag() const { return Iex_Qop; }
+
 std::unique_ptr<tri_op> tri_op::from_c(const IRExpr *e) {
 	auto rtv = std::make_unique<tri_op>();
 
+#ifdef LIBVEXXX_TAGGED
 	rtv->tag = Iex_Triop;
+#endif
 
 	auto *triop = e->Iex.Triop.details;
 	rtv->op = IR_op_xx{triop->op};
@@ -150,10 +172,14 @@ std::unique_ptr<tri_op> tri_op::from_c(const IRExpr *e) {
 	return rtv;
 }
 
+IRExprTag tri_op::type_tag() const { return Iex_Triop; }
+
 std::unique_ptr<bin_op> bin_op::from_c(const IRExpr *e) {
 	auto rtv = std::make_unique<bin_op>();
 
+#ifdef LIBVEXXX_TAGGED
 	rtv->tag = Iex_Binop;
+#endif
 
 	auto *binop = &(e->Iex.Binop);
 	rtv->op = IR_op_xx{binop->op};
@@ -163,10 +189,14 @@ std::unique_ptr<bin_op> bin_op::from_c(const IRExpr *e) {
 	return rtv;
 }
 
+IRExprTag bin_op::type_tag() const { return Iex_Binop; }
+
 std::unique_ptr<un_op> un_op::from_c(const IRExpr *e) {
 	auto rtv = std::make_unique<un_op>();
 
+#ifdef LIBVEXXX_TAGGED
 	rtv->tag = Iex_Unop;
+#endif
 
 	rtv->op = IR_op_xx{e->Iex.Unop.op};
 	rtv->arg = IR_expr_xx::from_c(e->Iex.Unop.arg);
@@ -174,10 +204,14 @@ std::unique_ptr<un_op> un_op::from_c(const IRExpr *e) {
 	return rtv;
 }
 
+IRExprTag un_op::type_tag() const { return Iex_Unop; }
+
 std::unique_ptr<load> load::from_c(const IRExpr *e) {
 	auto rtv = std::make_unique<load>();
 
+#ifdef LIBVEXXX_TAGGED
 	rtv->tag = Iex_Load;
+#endif
 	rtv->end = IR_endness_xx{e->Iex.Load.end};
 	rtv->ty = IR_type_xx{e->Iex.Load.ty};
 	rtv->addr = IR_expr_xx::from_c(e->Iex.Load.addr);
@@ -188,19 +222,27 @@ std::unique_ptr<load> load::from_c(const IRExpr *e) {
 	return rtv;
 }
 
+IRExprTag load::type_tag() const { return Iex_Load; }
+
 std::unique_ptr<constant> constant::from_c(const IRExpr *e) {
 	auto rtv = std::make_unique<constant>();
 
+#ifdef LIBVEXXX_TAGGED
 	rtv->tag = Iex_Const;
+#endif
 	rtv->con = IR_const_xx::from_c(e->Iex.Const.con);
 
 	return rtv;
 }
 
+IRExprTag constant::type_tag() const { return Iex_Const; }
+
 std::unique_ptr<C_call> C_call::from_c(const IRExpr *e) {
 	auto rtv = std::make_unique<C_call>();
 
+#ifdef LIBVEXXX_TAGGED
 	rtv->tag = Iex_CCall;
+#endif
 	rtv->cee = IR_callee_xx::from_c(e->Iex.CCall.cee);
 	rtv->ret_ty = IR_type_xx{e->Iex.CCall.retty};
 
@@ -211,10 +253,14 @@ std::unique_ptr<C_call> C_call::from_c(const IRExpr *e) {
 	return rtv;
 }
 
+IRExprTag C_call::type_tag() const { return Iex_CCall; }
+
 std::unique_ptr<ITE> ITE::from_c(const IRExpr *e) {
 	auto rtv = std::make_unique<ITE>();
 
+#ifdef LIBVEXXX_TAGGED
 	rtv->tag = Iex_ITE;
+#endif
 	rtv->cond = IR_expr_xx::from_c(e->Iex.ITE.cond);
 	rtv->if_true = IR_expr_xx::from_c(e->Iex.ITE.iftrue);
 	rtv->if_false = IR_expr_xx::from_c(e->Iex.ITE.iffalse);
@@ -222,21 +268,31 @@ std::unique_ptr<ITE> ITE::from_c(const IRExpr *e) {
 	return rtv;
 }
 
+IRExprTag ITE::type_tag() const { return Iex_ITE; }
+
 std::unique_ptr<VECRET> VECRET::from_c(const IRExpr *e) {
 	auto rtv = std::make_unique<VECRET>();
 
+#ifdef LIBVEXXX_TAGGED
 	rtv->tag = Iex_VECRET;
+#endif
 
 	return rtv;
 }
+
+IRExprTag VECRET::type_tag() const { return Iex_VECRET; }
 
 std::unique_ptr<GSPTR> GSPTR::from_c(const IRExpr *e) {
 	auto rtv = std::make_unique<GSPTR>();
 
+#ifdef LIBVEXXX_TAGGED
 	rtv->tag = Iex_GSPTR;
+#endif
 
 	return rtv;
 }
+
+IRExprTag GSPTR::type_tag() const { return Iex_GSPTR; }
 
 } // namespace ir_expr_types
 
@@ -338,9 +394,9 @@ std::ostream &get_R::pretty_print(std::ostream &os, arch_type arch) const {
 
 	auto *name = guest_register_name(offset, arch);
 	if (name) {
-		os << "%"<< name;
+		os << "%" << name;
 	} else {
-		os  << offset;
+		os << offset;
 	}
 
 	os << ")";

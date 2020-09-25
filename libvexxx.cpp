@@ -33,16 +33,22 @@ std::unique_ptr<IR_stmt_types::no_op>
 IR_stmt_types::no_op::from_c(const IRStmt *s) {
 	auto rtv = std::make_unique<no_op>();
 
+#ifdef LIBVEXXX_TAGGED
 	rtv->tag = Ist_NoOp;
+#endif
 
 	return rtv;
 }
+
+IRStmtTag IR_stmt_types::no_op::type_tag() const { return Ist_NoOp; }
 
 std::unique_ptr<IR_stmt_types::ABI_hint>
 IR_stmt_types::ABI_hint::from_c(const IRStmt *s) {
 	auto st = std::make_unique<ABI_hint>();
 
+#ifdef LIBVEXXX_TAGGED
 	st->tag = Ist_AbiHint;
+#endif
 	st->base = IR_expr_xx::from_c(s->Ist.AbiHint.base);
 	st->len = s->Ist.AbiHint.len;
 	st->nia = IR_expr_xx::from_c(s->Ist.AbiHint.nia);
@@ -50,11 +56,15 @@ IR_stmt_types::ABI_hint::from_c(const IRStmt *s) {
 	return st;
 }
 
+IRStmtTag IR_stmt_types::ABI_hint::type_tag() const { return Ist_AbiHint; }
+
 std::unique_ptr<IR_stmt_types::I_mark>
 IR_stmt_types::I_mark::from_c(const IRStmt *s) {
 	auto st = std::make_unique<I_mark>();
 
+#ifdef LIBVEXXX_TAGGED
 	st->tag = Ist_IMark;
+#endif
 	st->addr = s->Ist.IMark.addr;
 	st->len = s->Ist.IMark.len;
 	st->delta = s->Ist.IMark.delta;
@@ -62,22 +72,30 @@ IR_stmt_types::I_mark::from_c(const IRStmt *s) {
 	return st;
 }
 
+IRStmtTag IR_stmt_types::I_mark::type_tag() const { return Ist_IMark; }
+
 std::unique_ptr<IR_stmt_types::put>
 IR_stmt_types::put::from_c(const IRStmt *s) {
 	auto st = std::make_unique<put>();
 
+#ifdef LIBVEXXX_TAGGED
 	st->tag = Ist_Put;
+#endif
 	st->offset = s->Ist.Put.offset;
 	st->data = IR_expr_xx::from_c(s->Ist.Put.data);
 
 	return st;
 }
 
+IRStmtTag IR_stmt_types::put::type_tag() const { return Ist_Put; }
+
 std::unique_ptr<IR_stmt_types::put_I>
 IR_stmt_types::put_I::from_c(const IRStmt *s) {
 	auto st = std::make_unique<put_I>();
 
+#ifdef LIBVEXXX_TAGGED
 	st->tag = Ist_PutI;
+#endif
 
 	auto &&det = s->Ist.PutI.details;
 
@@ -88,6 +106,8 @@ IR_stmt_types::put_I::from_c(const IRStmt *s) {
 
 	return st;
 }
+
+IRStmtTag IR_stmt_types::put_I::type_tag() const { return Ist_PutI; }
 
 /*
 std::unique_ptr<IR_put_I_xx> IR_put_I_xx::from_c(const IRPutI *s) {
@@ -107,18 +127,24 @@ std::unique_ptr<IR_stmt_types::wr_tmp>
 IR_stmt_types::wr_tmp::from_c(const IRStmt *s) {
 	auto st = std::make_unique<wr_tmp>();
 
+#ifdef LIBVEXXX_TAGGED
 	st->tag = Ist_WrTmp;
+#endif
 	st->tmp = IR_temp_xx{s->Ist.WrTmp.tmp};
 	st->data = IR_expr_xx::from_c(s->Ist.WrTmp.data);
 
 	return st;
 }
 
+IRStmtTag IR_stmt_types::wr_tmp::type_tag() const { return Ist_WrTmp; }
+
 std::unique_ptr<IR_stmt_types::store>
 IR_stmt_types::store::from_c(const IRStmt *s) {
 	auto st = std::make_unique<store>();
 
+#ifdef LIBVEXXX_TAGGED
 	st->tag = Ist_Store;
+#endif
 	st->end = IR_endness_xx{s->Ist.Store.end};
 	st->addr = IR_expr_xx::from_c(s->Ist.Store.addr);
 	st->data = IR_expr_xx::from_c(s->Ist.Store.data);
@@ -129,11 +155,15 @@ IR_stmt_types::store::from_c(const IRStmt *s) {
 	return st;
 }
 
+IRStmtTag IR_stmt_types::store::type_tag() const { return Ist_Store; }
+
 std::unique_ptr<IR_stmt_types::store_G>
 IR_stmt_types::store_G::from_c(const IRStmt *s) {
 	auto st = std::make_unique<store_G>();
 
+#ifdef LIBVEXXX_TAGGED
 	st->tag = Ist_StoreG;
+#endif
 
 	auto &&det = s->Ist.StoreG.details;
 	st->end = IR_endness_xx{det->end};
@@ -143,6 +173,8 @@ IR_stmt_types::store_G::from_c(const IRStmt *s) {
 
 	return st;
 }
+
+IRStmtTag IR_stmt_types::store_G::type_tag() const { return Ist_StoreG; }
 
 /*
 std::unique_ptr<IR_store_G_xx> IR_store_G_xx::from_c(const IRStoreG *s) {
@@ -161,7 +193,9 @@ std::unique_ptr<IR_stmt_types::load_G>
 IR_stmt_types::load_G::from_c(const IRStmt *s) {
 	auto st = std::make_unique<load_G>();
 
+#ifdef LIBVEXXX_TAGGED
 	st->tag = Ist_LoadG;
+#endif
 
 	auto *det = s->Ist.LoadG.details;
 	st->end = IR_endness_xx{det->end};
@@ -175,6 +209,8 @@ IR_stmt_types::load_G::from_c(const IRStmt *s) {
 
 	return st;
 }
+
+IRStmtTag IR_stmt_types::load_G::type_tag() const { return Ist_LoadG; }
 
 /*
 std::unique_ptr<IR_load_G_xx> IR_load_G_xx::from_c(const IRLoadG *s) {
@@ -195,7 +231,9 @@ std::unique_ptr<IR_stmt_types::CAS>
 IR_stmt_types::CAS::from_c(const IRStmt *s) {
 	auto rtv = std::make_unique<CAS>();
 
+#ifdef LIBVEXXX_TAGGED
 	rtv->tag = Ist_CAS;
+#endif
 
 	auto *det = s->Ist.CAS.details;
 	rtv->old_hi = IR_temp_xx{det->oldHi};
@@ -211,6 +249,8 @@ IR_stmt_types::CAS::from_c(const IRStmt *s) {
 
 	return rtv;
 }
+
+IRStmtTag IR_stmt_types::CAS::type_tag() const { return Ist_CAS; }
 
 /*
 std::unique_ptr<IR_CAS_xx> IR_CAS_xx::from_c(const IRCAS *s) {
@@ -234,7 +274,9 @@ IR_stmt_types::LLSC::from_c(const IRStmt *s) {
 	auto rtv = std::make_unique<LLSC>();
 	auto &&llsc = s->Ist.LLSC;
 
+#ifdef LIBVEXXX_TAGGED
 	rtv->tag = Ist_LLSC;
+#endif
 	rtv->end = IR_endness_xx{llsc.end};
 	rtv->result = IR_temp_xx{llsc.result};
 	rtv->addr = IR_expr_xx::from_c(llsc.addr);
@@ -245,11 +287,15 @@ IR_stmt_types::LLSC::from_c(const IRStmt *s) {
 	return rtv;
 }
 
+IRStmtTag IR_stmt_types::LLSC::type_tag() const { return Ist_LLSC; }
+
 std::unique_ptr<IR_stmt_types::dirty>
 IR_stmt_types::dirty::from_c(const IRStmt *s) {
 	auto rtv = std::make_unique<dirty>();
 
+#ifdef LIBVEXXX_TAGGED
 	rtv->tag = Ist_Dirty;
+#endif
 
 	auto *det = s->Ist.Dirty.details;
 	rtv->cee = IR_callee_xx::from_c(det->cee);
@@ -282,6 +328,8 @@ IR_stmt_types::dirty::from_c(const IRStmt *s) {
 
 	return rtv;
 }
+
+IRStmtTag IR_stmt_types::dirty::type_tag() const { return Ist_Dirty; }
 
 /*
 std::unique_ptr<IR_dirty_xx> IR_dirty_xx::from_c(const IRDirty *s) {
@@ -321,17 +369,23 @@ std::unique_ptr<IR_stmt_types::MBE>
 IR_stmt_types::MBE::from_c(const IRStmt *s) {
 	auto rtv = std::make_unique<MBE>();
 
+#ifdef LIBVEXXX_TAGGED
 	rtv->tag = Ist_MBE;
+#endif
 	rtv->event = IR_MBUS_event_xx{s->Ist.MBE.event};
 
 	return rtv;
 }
 
+IRStmtTag IR_stmt_types::MBE::type_tag() const { return Ist_MBE; }
+
 std::unique_ptr<IR_stmt_types::exit>
 IR_stmt_types::exit::from_c(const IRStmt *s) {
 	auto rtv = std::make_unique<exit>();
 
+#ifdef LIBVEXXX_TAGGED
 	rtv->tag = Ist_Exit;
+#endif
 	rtv->guard = IR_expr_xx::from_c(s->Ist.Exit.guard);
 	rtv->jk = IR_jump_kind_xx{s->Ist.Exit.jk};
 	rtv->dst = IR_const_xx::from_c(s->Ist.Exit.dst);
@@ -339,6 +393,8 @@ IR_stmt_types::exit::from_c(const IRStmt *s) {
 
 	return rtv;
 }
+
+IRStmtTag IR_stmt_types::exit::type_tag() const { return Ist_Exit; }
 
 std::unique_ptr<IR_stmt_xx> IR_stmt_xx::from_c(const IRStmt *s) {
 	switch (s->tag) {
@@ -400,15 +456,14 @@ std::ostream &IRSB_xx::pretty_print(std::ostream &os, arch_type arch) const {
 	}
 	os << "\tPUT(";
 
-	auto *name=guest_register_name(offs_IP,arch);
-	if(name){
-		os<<"%"<<name;
+	auto *name = guest_register_name(offs_IP, arch);
+	if (name) {
+		os << "%" << name;
+	} else {
+		os << offs_IP;
 	}
-	else{
-		os<<offs_IP;
-	}
-	
-	os<< ") = ";
+
+	os << ") = ";
 	next->pretty_print(os, arch);
 	os << "; exit-" << this->jumpkind;
 	os << "\n}\n";
@@ -548,7 +603,7 @@ std::ostream &put::pretty_print(std::ostream &os, arch_type arch) const {
 	os << "PUT(";
 	auto name = guest_register_name(offset, arch);
 	if (name) {
-		os <<"%"<< name;
+		os << "%" << name;
 	} else {
 		os << offset;
 	}
@@ -693,15 +748,14 @@ std::ostream &exit::pretty_print(std::ostream &os, arch_type arch) const {
 	guard->pretty_print(os, arch);
 	os << ") { PUT(";
 
-	auto *name=guest_register_name(offs_IP,arch);
-	if(name){
-		os<<"%"<<name;
+	auto *name = guest_register_name(offs_IP, arch);
+	if (name) {
+		os << "%" << name;
+	} else {
+		os << offs_IP;
 	}
-	else{
-		os<<offs_IP;
-	}
-	
-	os<< ") = ";
+
+	os << ") = ";
 	dst->pretty_print(os);
 	os << "; exit-" << jk << " } ";
 
